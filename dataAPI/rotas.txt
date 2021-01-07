@@ -1,0 +1,46 @@
+ROTAS
+ 
+-> Users
+
+      -> GET
+
+	- users/login (Verificação de autenticação)
+
+	- users/:id (Toda a informação de um utilizador)
+
+
+      -> POST
+
+	- users/ (Inserção de um utilizador)
+
+      -> PUT
+
+	- users/:id (Update de um utilizador)
+
+	- users/:id/password (Update da password de um utilizador)
+
+      -> DELETE
+	
+	- users/:id (Remoção de um utilizador)
+
+----------------------------------------------------------------------------------------------------
+
+-> Recursos
+
+      
+      -> GET
+
+	- recursos/:id
+
+
+      -> POST
+
+	- recursos/
+
+      -> PUT
+
+	- recursos/:id 
+
+      -> DELETE
+	
+	- recursos/:id 
