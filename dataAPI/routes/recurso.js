@@ -71,4 +71,6 @@
              res.status(500).jsonp(erro)
            })
        })
+       
+ module.exports = router;
      

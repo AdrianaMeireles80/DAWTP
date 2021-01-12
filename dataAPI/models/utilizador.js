@@ -1,7 +1,7 @@
 var mongoose = require('mongoose')
 
 var userSchema = new mongoose.Schema({
-    iduser: String,
+    idutilizador: Number,
     nome: String,
     email: String,
     filiacao: String,
@@ -12,4 +12,5 @@ var userSchema = new mongoose.Schema({
 
 })
 
-module.exports = mongoose.model('user',userSchema)
+
+module.exports = mongoose.model('utilizador',userSchema)

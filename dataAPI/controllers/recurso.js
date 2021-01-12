@@ -1,4 +1,4 @@
-var Recurso = require('../models/user')
+var Recurso = require('../models/recurso')
 
 //Retorna a lista de utilizadores
 module.exports.listar = () => {
@@ -26,6 +26,6 @@ module.exports.apagar = id => {
 
 module.exports.editar = (id,rec) =>{
     return Recurso
-            .findOneAndUpdate(id,{$set:{subtitulo: rec.subtitulo,visibilidade: rec.visibilidade}})
+            .findOneAndUpdate({idrec: id},{$set:{subtitulo: rec.subtitulo,visibilidade: rec.visibilidade}})
             .exec()
 }

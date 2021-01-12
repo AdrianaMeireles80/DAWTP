@@ -2,9 +2,10 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var logger = require('morgan');
+
 var mongoose = require('mongoose');
 
-var mongoDB = 'mongodb://127.0.0.1/RepDB'
+var mongoDB = 'mongodb://127.0.0.1/dataDB'
 mongoose.connect(mongoDB,{useNewUrlParser: true, useUnifiedTopology: true});
 
 //Get the default connection
@@ -16,7 +17,8 @@ db.once('open', function() {
     console.log("Conexão ao MongoDB realizada com sucesso...")
 });
 
-var indexRouter = require('./routes/index');
+var utilizadorRouter = require('./routes/utilizador');
+var recursoRouter = require('./routes/recurso');
 
 var app = express();
 
@@ -29,7 +31,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+app.use('/utilizador', utilizadorRouter);
+app.use('/recurso', recursoRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

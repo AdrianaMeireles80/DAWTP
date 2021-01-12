@@ -1,0 +1,16 @@
+{
+    "utilizador": [
+        {
+        "nome": "asdrubal",
+        "email": "bla@hotmail.com",
+        "filiacao": "estudante",
+        "nivel": "1",
+        "dataRegisto": "05-01-2021",
+        "dataUltimoAcesso": "07-01-2021" ,
+        "password" : "123A"   
+        }
+    
+    
+]
+
+}
