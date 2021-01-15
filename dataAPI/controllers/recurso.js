@@ -4,13 +4,13 @@ var Recurso = require('../models/recurso')
 module.exports.listar = () => {
     return Recurso
             .find()
-            .sort({tipo:1})
+            .sort({titulo:1})
             .exec()
 }
 
 module.exports.procurar = id => {
     return Recurso
-            .findOne({idrec: id})
+            .findOne({_id: id})
 }
 
 module.exports.adicionar = rec => {    
@@ -20,12 +20,12 @@ module.exports.adicionar = rec => {
 
 module.exports.apagar = id => {
     return Recurso
-            .findOneAndDelete({idrec: id})
+            .findOneAndDelete({_id: id})
             .exec()
 }
 
 module.exports.editar = (id,rec) =>{
     return Recurso
-            .findOneAndUpdate({idrec: id},{$set:{subtitulo: rec.subtitulo,visibilidade: rec.visibilidade}})
+            .findOneAndUpdate({_id: id},{$set:{tipo: rec.tipo,visibilidade: rec.visibilidade}})
             .exec()
 }

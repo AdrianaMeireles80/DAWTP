@@ -27,3 +27,50 @@
         </v-flex>
     </v-layout>  
 </template>
+
+<script>
+import axios from "axios"
+////const h = require("@/config/hosts").hostAPI
+//const authpath = require("@/config/hosts").hostAuthAPI
+import VueJwtDecode from "vue-jwt-decode";
+
+  export default {
+    data(){
+      return {
+        email : "",
+        password : "",
+        showPassword: false
+      }
+    },
+    methods: {
+      login: async function () {
+        try {
+        
+        let response = await axios.post("http://localhost:7800/" + "login", {email: this.email, password: this.password},{withCredentials: true});
+        if(!response.data.login){
+          this.password = ""
+          alert("Crendenciais erradas, tente novamente.")
+          return;
+        } 
+        
+        /*
+        let token = response.data.token;
+        if (token) {
+          localStorage.setItem("user", JSON.stringify(response.data.user))
+          localStorage.setItem("jwt", token);
+          alert("Login efetuado com sucesso");
+       }
+          this.$emit("refreshLogout")
+          */
+       } 
+       catch (err) {
+        this.password = ""
+        alert(err)
+      }
+      },
+      registar: function(){
+        this.$emit("registar");
+      }
+    }
+  }
+</script>

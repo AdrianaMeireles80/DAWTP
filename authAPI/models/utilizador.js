@@ -1,14 +1,14 @@
 var mongoose = require('mongoose')
 
 var userSchema = new mongoose.Schema({
-    idutilizador: Number,
-    nome: String,
-    email: String,
+
+    nome: {type:String, required: true},
+    email: {type: String, required:true},
     filiacao: String,
-    nivel: Number,
+    nivel: {type:String, required:true},
     dataRegisto: Date,
     dataUltimoAcesso: Date ,
-    password :String
+    password :{type: String, required:true}
 
 })
 

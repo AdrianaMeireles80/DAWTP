@@ -1,4 +1,5 @@
 var express = require('express');
+const passport = require('passport');
 var router = express.Router();
 //var bcrypt = require('bcryptjs')
 var Utls = require('../controllers/utilizador');
@@ -29,8 +30,8 @@ var Utls = require('../controllers/utilizador');
 */
 
 /*GET devolve utilizador com determinado id */
-router.get('/:id', function(req,res,next){
-    Utls.procurar(req.params.id)
+router.get('/:email', function(req,res,next){
+    Utls.procurar(req.params.email)
         .then(dados => {
             res.jsonp(dados)
         })
@@ -41,6 +42,15 @@ router.get('/:id', function(req,res,next){
 })
 
 /* GET login */
+router.post('/login', passport.authenticate('local'),function(req,res){
+    jwt.sign({email: req.utilizador.email, password: req.utilizador.password},
+        "DAWTP2020",
+        {expiresIn: 1800},
+        function(e,token){
+            if(e) res.status(500).jsonp({error: "Erro na geração do token" + e})
+            else res.status(201).jsonp({token: token})
+        });
+})
 
 /*POST criação de um novo utilizador */
 router.post('/',function(req,res,next){
@@ -55,8 +65,8 @@ router.post('/',function(req,res,next){
 })
 
 /*PUT modificar utilizador */
-router.put('/:id',function(req,res,next){
-    Utls.editar(req.params.id,req.body)
+router.put('/:email',function(req,res,next){
+    Utls.editar(req.params.email,req.body)
         .then(dados => {
             res.jsonp(dados)
         })
@@ -70,8 +80,8 @@ router.put('/:id',function(req,res,next){
 
 
 /*DELETE apagar um utilizador */
-router.delete('/:id',function(req,res,next){
-    Utls.apagar(req.params.id)
+router.delete('/:email',function(req,res,next){
+    Utls.apagar(req.params.email)
         .then(dados => {
             res.jsonp(dados)
         })
