@@ -24,6 +24,17 @@
      var router = express.Router();
      var Recs = require('../controllers/recurso');
 
+     router.get('/',function(req,res,next){
+      Recs.listar()
+         .then(dados => {
+           res.jsonp(dados)
+         })
+         .catch(erro => {
+           console.log(erro);
+           res.status(500).jsonp(erro)
+         })
+    })
+
      //Get utilizador
      router.get('/:id',function(req,res,next){
        Recs.procurar(req.params.id)

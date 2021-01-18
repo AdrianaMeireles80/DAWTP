@@ -3,7 +3,7 @@ const passport = require('passport');
 var router = express.Router();
 //var bcrypt = require('bcryptjs')
 var Utls = require('../controllers/utilizador');
-
+var jwt = require('jsonwebtoken')
 /*
 -> Users
 
@@ -28,6 +28,17 @@ var Utls = require('../controllers/utilizador');
 	
 	- users/:id (Remoção de um utilizador)
 */
+/*GET devolve todos os utilizadores */
+router.get('/', function(req,res,next){
+    Utls.listar()
+        .then(dados => {
+            res.jsonp(dados)
+        })
+        .catch(erro => {
+            console.log(erro);
+            res.status(500).jsonp(erro)    
+        })
+})
 
 /*GET devolve utilizador com determinado id */
 router.get('/:email', function(req,res,next){
@@ -41,9 +52,9 @@ router.get('/:email', function(req,res,next){
         })
 })
 
-/* GET login */
+/* POST login */
 router.post('/login', passport.authenticate('local'),function(req,res){
-    jwt.sign({email: req.utilizador.email, password: req.utilizador.password},
+    jwt.sign({email: req.body.email, password: req.body.password},
         "DAWTP2020",
         {expiresIn: 1800},
         function(e,token){

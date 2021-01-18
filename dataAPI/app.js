@@ -1,7 +1,7 @@
 var createError = require('http-errors');
 var express = require('express');
-var path = require('path');
 var logger = require('morgan');
+var jwt = require('jsonwebtoken')
 
 var mongoose = require('mongoose');
 
@@ -17,21 +17,32 @@ db.once('open', function() {
     console.log("Conexão ao MongoDB realizada com sucesso...")
 });
 
-var utilizadorRouter = require('./routes/utilizador');
 var recursoRouter = require('./routes/recurso');
 
 var app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/utilizador', utilizadorRouter);
+//verifica se o pedido veio com o token de acesso
+app.use(function(req,res,next){
+  var myToken = req.query.token || req.body.token
+  if(myToken) {
+    jwt.verify(myToken,'DAWTP2020',function(err,payload){
+      if(err){
+        res.status(401).jsonp({error: err})
+      }
+      else {
+        next()
+      }
+    })
+  }
+  else {
+    res.status(401).jsonp({error: "Token inexistente!"})
+  }
+})
+
 app.use('/recurso', recursoRouter);
 
 // catch 404 and forward to error handler
@@ -46,8 +57,8 @@ app.use(function(err, req, res, next) {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  res.status(err.status || 500).jsonp({error: err});
+
 });
 
 module.exports = app;

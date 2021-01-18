@@ -1,0 +1,21 @@
+extends layout 
+
+block content
+    h1 Lista de Recursos
+    .w3-container.w3-margin
+        table.w3-table-all
+            tr 
+                th Tipo
+                th Titulo
+                th Subtitulo
+                th Data de Criação
+                th Data de Registo
+                th Visibilidade
+            each r in lista
+                tr 
+                    td= r.tipo
+                    td= r.titulo
+                    td= r.subtitulo
+                    td= r.dataCriacao
+                    td= r.dataRegisto
+                    td= r.visibilidade
