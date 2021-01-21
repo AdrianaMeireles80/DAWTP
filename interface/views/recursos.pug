@@ -1,21 +1,80 @@
 extends layout 
 
 block content
-    h1 Lista de Recursos
+    w3-container.w3-center 
+        h1 
+            b Lista de Recursos
+    
+    .w3-container.w3-margin
+        .w3-right Conta de #{email}
+
+    .w3-container.w3-margin
+        if(nivel != 0)
+            .w3-btn.w3-border.w3-left.w3-grey
+                a(href='/recursoForm') Novo Recurso
+        .w3-btn.w3-border.w3-right.w3-grey
+            a(href='/logout') Logout
+
+    if(nivel == 2)
+        .w3-container.w3-margin
+            table.w3-table-all
+                tr 
+                    th Tipo
+                    th Titulo
+                    th Subtitulo
+                    th Utilizador
+                    th Data de Criação
+                    th Data de Registo
+                    th
+                    th
+                
+                    each r in lista
+                        if (!r.validado)
+                            tr 
+                                td= r.tipo
+                                td= r.titulo
+                                td= r.subtitulo
+                                td= r.nomeProdutor
+                                td= r.dataCriacao
+                                td= r.dataRegisto
+                                td
+                                    form(method='POST' action=`/recurso/aprovar/${r._id}`)
+                                        input(type='submit' value='Aprovado')
+                                td
+                                    form(method='POST' action=`/recurso/${r._id}`)
+                                        input(type='submit' value='Não Aprovado')
+        
     .w3-container.w3-margin
         table.w3-table-all
             tr 
                 th Tipo
                 th Titulo
                 th Subtitulo
+                th Utilizador
                 th Data de Criação
                 th Data de Registo
-                th Visibilidade
+                th
+                if (nivel != 0)
+                    th
+                
             each r in lista
-                tr 
-                    td= r.tipo
-                    td= r.titulo
-                    td= r.subtitulo
-                    td= r.dataCriacao
-                    td= r.dataRegisto
-                    td= r.visibilidade
+                if ((r.visibilidade || nivel == 2 || r.emailProdutor == email) && r.validado)
+                    tr 
+                        td= r.tipo
+                        td= r.titulo
+                        td= r.subtitulo
+                        td= r.nomeProdutor
+                        td= r.dataCriacao
+                        td= r.dataRegisto
+                        td
+                            form(method='GET' action=`/recurso/download/${r.nomeFicheiro}`)
+                                input(type='submit' value='Download')
+
+                        if (nivel == 2 || r.emailProdutor == email)
+                            td
+                                form(method='POST' action=`/recurso/${r._id}`)
+                                    input(type='submit' value='Apagar')
+
+
+                        else
+                            td

@@ -28,8 +28,27 @@ var jwt = require('jsonwebtoken')
 	
 	- users/:id (Remoção de um utilizador)
 */
+function checkPermissao(acesso){
+    return function(req, res, next) {
+    if(acesso == 0 || req.utilizador.nivel>=acesso){
+      console.log("Tem permissão")
+      next()
+    }
+    else{
+    console.log("Não tem permissão")
+    res.status(401).jsonp("Não tem permissão")
+    }
+    }
+  }
+
+  /*
+    0-Consumidor
+    1- Produtor
+    2- Administrador
+  */
+
 /*GET devolve todos os utilizadores */
-router.get('/', function(req,res,next){
+router.get('/' ,function(req,res,next){
     Utls.listar()
         .then(dados => {
             res.jsonp(dados)
@@ -41,7 +60,7 @@ router.get('/', function(req,res,next){
 })
 
 /*GET devolve utilizador com determinado id */
-router.get('/:email', function(req,res,next){
+router.get('/:email',function(req,res,next){
     Utls.procurar(req.params.email)
         .then(dados => {
             res.jsonp(dados)
@@ -59,20 +78,38 @@ router.post('/login', passport.authenticate('local'),function(req,res){
         {expiresIn: 1800},
         function(e,token){
             if(e) res.status(500).jsonp({error: "Erro na geração do token" + e})
-            else res.status(201).jsonp({token: token})
+            else {
+                Utls.procurar(req.body.email)
+                    .then(dados => {
+                        res.status(201).jsonp({token: token, nivel: dados.nivel, email: req.body.email })
+                    })
+                    .catch(erro => {
+                        console.log(erro);
+                        res.status(500).jsonp(erro)    
+                    })
+            }
         });
 })
 
 /*POST criação de um novo utilizador */
 router.post('/',function(req,res,next){
-    Utls.adicionar(req.body)
-        .then(dados => {
-            res.jsonp(dados)
-        })
-        .catch(erro => {
-            console.log(erro);
-            res.status(500).jsonp(erro)
-        })
+    Utls.consultar(req.body.email, function(err, util) {
+        if (err) {
+          next(err)
+        }
+        else if (util) {
+            res.status(406).jsonp({error: "Email já existente"})
+        }
+        else {
+            Utls.adicionar(req.body)
+                .then(dados => {
+                    res.status(201).jsonp(dados)
+                })
+                .catch(erro => {
+                    res.status(500).jsonp({error: erro})
+                })
+        }
+      })
 })
 
 /*PUT modificar utilizador */

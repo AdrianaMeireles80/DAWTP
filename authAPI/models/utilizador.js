@@ -5,9 +5,9 @@ var userSchema = new mongoose.Schema({
     nome: {type:String, required: true},
     email: {type: String, required:true},
     filiacao: String,
-    nivel: {type:String, required:true},
-    dataRegisto: Date,
-    dataUltimoAcesso: Date ,
+    nivel: {type: Number, required:true},
+    dataRegisto: String,
+    dataUltimoAcesso: String,
     password :{type: String, required:true}
 
 })

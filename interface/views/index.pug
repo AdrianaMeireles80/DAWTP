@@ -1,7 +1,25 @@
 extends layout
 
 block content
-  h1 Gestão de Recursos
-  a(href='/login') Login
-  a(href='/recurso') Recursos
+  center
+    h1 Gestão de Recursos
+  block content
+    .w3-container.w3-margin.w3-border
+        .w3-container.w3-blue
+            h3 Introduza as suas credenciais:
+        form.w3-container(action='/login', method='POST')
+            label Email:
+            input.w3-input(type="text" name="email" required)
+            label Password:
+            input.w3-input(type="password" name="password" required)
+            input.w3-btn.w3-blue(type="submit" value="Enviar")
+         
+        center
+          a(href='/registo')
+            button.w3-button Ainda não possui conta? Registe-se aqui.
+         
+            
+           
+
+
   

@@ -11,6 +11,8 @@ module.exports.procurar = email => {
 
 module.exports.adicionar = utilizador => {
     //utilizador.password = bcrypt.hashSync(utilizador.password,6)
+    utilizador.dataRegisto = new Date().toISOString().substring(0,10)
+    utilizador.dataUltimoAcesso = new Date().toISOString().substring(0,10)
     var novoUti = new Utilizador(utilizador)
     return novoUti.save()
 }
@@ -23,4 +25,11 @@ module.exports.editar = (email,utilizador) =>{
     return Utilizador
             .findOneAndUpdate({email: email},{$set:{nome: utilizador.nome,filiacao: utilizador.filiacao,password:utilizador.password}})
             .exec()
+}
+
+module.exports.consultar = (e, callback) => {
+    return Utilizador
+     .findOne({email: e})
+     .exec()
+     .then(data => callback(null, data))
 }

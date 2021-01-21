@@ -13,14 +13,24 @@ module.exports.procurar = id => {
             .findOne({_id: id})
 }
 
-module.exports.adicionar = rec => {    
+module.exports.adicionar = rec => {  
+    rec.dataRegisto = new Date().toISOString().substring(0,10)
+    rec.validado = false
+    
     var novoRec = new Recurso(rec)
+    
     return novoRec.save()
 }
 
 module.exports.apagar = id => {
     return Recurso
             .findOneAndDelete({_id: id})
+            .exec()
+}
+
+module.exports.aprovar = id =>{
+    return Recurso
+            .findOneAndUpdate({_id: id},{$set:{validado: "true"}})
             .exec()
 }
 
