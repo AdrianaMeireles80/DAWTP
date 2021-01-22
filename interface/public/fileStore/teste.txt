@@ -1,0 +1,159 @@
+p1: Lst  --> '[' Els ']'
+
+p2: Els  -->  Elem
+
+p3:    		|   Els   ','  Elem
+
+p4: Elem --> num           LA(p4) = First(num) = {num}
+
+p5:           |    Range   LA(p5) = First(Range) = First(num '.''.' num) = {num}
+
+p6:           |    Lst     LA(p6) = First(Lst) = {'['}
+
+p7: Range --> num '.''.' num
+
+
+// Recursividade à esquerda
+p1: A --> A a b   LA(p1) = {a}
+p2:     | a       LA(p2) = {a}
+
+
+p0: Z --> A '$'     
+p1: A --> a A'      LA(p1) = {a}
+p2: A' -->          LA(p2) = Follow(A') = Follow(A) = {'$'}
+p3       | a b A'   LA(p3) = {a}
+
+// Prefixo Comum
+p1: A --> a A 
+        | a b B 
+        | a 
+
+p0: Z --> A '$'
+p1: A --> a A'
+p2: A' --> b B   LA(p2) = {b}
+p3:      |       LA(p3) = Follow(A') = Follow(A) = {'$'}
+p4:      | A     LA(p4) = {a}
+
+---------------------------------
+Pergunta 2
+---------------------------------
+
+p1: Lst  --> '[' Els ']'     
+
+p2: Els  -->  Elem  Outros
+
+p3: Outros -->                   LA(p3) = Follow(Outros) = Follow(Els) = {']'}
+
+p4: 	     |  ,'  Elem Outros  LA(p4) = {','}
+
+p5: Elem   --> num Range         LA(p5) = {num}
+
+p6:              |   Lst         LA(p6) = {'['}
+
+p7: Range  -->  '.''.' num       LA(p7) = {'.'}
+
+p8:              |               LA(p8) = Follow(Range) = Follow(Elem) = FirstN(Outros) = {',', ']'}
+
+_____________________________________________
+LR0
+_____________________________________________
+
+p0: Z --> A '$'
+p1: A --> A a b   
+p2:     | a       
+
+Estado 0
+_____________
+Z --> . A '$'
+------------
+A --> . A a b 
+A --> . a 
+____________ 
+
+Tansição de 0 por A 
+
+Estado 1
+_____________
+Z --> A . '$'
+A --> A . a b 
+_____________
+
+ 
+Transição de 0 por a
+
+Estado 2
+_____________
+A --> a . #r2
+_____________
+
+
+Transição de 1 por '$'
+
+Estado 3
+_____________________________________________
+Z --> A '$' . #r0 / rec.
+_____________________________________________
+
+Transição de 1 por a 
+
+Estado 4
+_____________________________________________
+A --> A a . b
+_____________________________________________
+
+
+Transição de 4 por b
+
+Estado 5
+_____________________________________________
+A --> A a b .   #r1 
+_____________________________________________
+
+
+
+
+
+
+p1: Lst  --> '[' Els ']'
+
+p2: Els  -->  Elem
+
+p3:    		|   Els   ','  Elem
+     
+p4:         |                   LA(p4) = {',', ']'}
+
+p5: Elem --> num           
+
+p6:           |    Range   
+
+p7:           |    Lst     
+
+p8: Range --> num '.''.' num
+
+
+Estado 0
+_____________________________________________
+Lst  --> . '[' Els ']'
+_____________________________________________
+
+
+Transição de 0 por '[' 
+
+Estado 1
+_____________________________________________
+Lst  --> '[' . Els ']'
+-----------------------
+Els   --> . Elem
+Els   --> . Els   ','  Elem
+Els   --> .   #r4
+Elem  --> . num           
+Elem  --> . Range   
+Elem  --> . Lst     
+Range --> . num '.''.' num
+Lst  --> . '[' . Els ']'
+
+        Transições por: Elem Els num Range Lst '['
+        Redução: #r4
+
+        Tentativa de resolução --> SLR1
+            LA(p4) = {',', ']'

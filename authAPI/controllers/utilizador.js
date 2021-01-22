@@ -1,4 +1,5 @@
 var Utilizador = require('../models/utilizador')
+var bcrypt = require('bcryptjs')
 
 //Retorna a lista de utilizadores
 module.exports.listar = () => {
@@ -10,7 +11,7 @@ module.exports.procurar = email => {
 }
 
 module.exports.adicionar = utilizador => {
-    //utilizador.password = bcrypt.hashSync(utilizador.password,6)
+    utilizador.password = bcrypt.hashSync(utilizador.password,6)
     utilizador.dataRegisto = new Date().toISOString().substring(0,10)
     utilizador.dataUltimoAcesso = new Date().toISOString().substring(0,10)
     var novoUti = new Utilizador(utilizador)

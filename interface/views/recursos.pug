@@ -10,15 +10,15 @@ block content
 
     .w3-container.w3-margin
         if(nivel != 0)
-            .w3-btn.w3-border.w3-left.w3-grey
+            .w3-btn.w3-border.w3-left.w3-blue
                 a(href='/recursoForm') Novo Recurso
-        .w3-btn.w3-border.w3-right.w3-grey
+        .w3-btn.w3-border.w3-right.w3-blue
             a(href='/logout') Logout
 
     if(nivel == 2)
         .w3-container.w3-margin
             table.w3-table-all
-                tr 
+                tr.w3-blue
                     th Tipo
                     th Titulo
                     th Subtitulo
@@ -46,7 +46,7 @@ block content
         
     .w3-container.w3-margin
         table.w3-table-all
-            tr 
+            tr.w3-blue
                 th Tipo
                 th Titulo
                 th Subtitulo
@@ -74,7 +74,5 @@ block content
                             td
                                 form(method='POST' action=`/recurso/${r._id}`)
                                     input(type='submit' value='Apagar')
-
-
                         else
                             td

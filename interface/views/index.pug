@@ -1,25 +1,25 @@
 extends layout
 
 block content
+
   center
     h1 Gestão de Recursos
-  block content
-    .w3-container.w3-margin.w3-border
-        .w3-container.w3-blue
-            h3 Introduza as suas credenciais:
-        form.w3-container(action='/login', method='POST')
-            label Email:
-            input.w3-input(type="text" name="email" required)
-            label Password:
-            input.w3-input(type="password" name="password" required)
-            input.w3-btn.w3-blue(type="submit" value="Enviar")
-         
-        center
-          a(href='/registo')
+
+  center
+    .w3-container.w3-margin.w3-border.w3-border-blue.w3-center(style="height:350px;width:40%;margin:auto;")
+      .w3-blue
+        h3 Introduza as suas credenciais:
+
+      form.w3-container(action='/login', method='POST' style="height:200px;width:50%;margin:auto;")
+        label Email:
+          input.w3-input(type="text" name="email" required)
+
+        label Password:
+          input.w3-input(type="password" name="password" required)
+
+        input.w3-btn.w3-blue(type="submit" value="Login" style="margin-top:20px;")
+
+      footer.w3-container(style="margin-top:50px;")
+        address.w3-right
+          a(href='/registo') 
             button.w3-button Ainda não possui conta? Registe-se aqui.
-         
-            
-           
-
-
-  
