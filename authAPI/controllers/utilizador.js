@@ -10,12 +10,18 @@ module.exports.procurar = email => {
     return Utilizador.findOne({email: email}).exec()
 }
 
-module.exports.adicionar = utilizador => {
-    utilizador.password = bcrypt.hashSync(utilizador.password,6)
-    utilizador.dataRegisto = new Date().toISOString().substring(0,10)
-    utilizador.dataUltimoAcesso = new Date().toISOString().substring(0,10)
-    var novoUti = new Utilizador(utilizador)
-    return novoUti.save()
+module.exports.adicionar = (utilizador, callback) => {
+    bcrypt.hash(utilizador.password,6)
+        .then(function(hash){
+            utilizador.password = hash
+            utilizador.dataRegisto = new Date().toISOString().substring(0,10)
+            utilizador.dataUltimoAcesso = new Date().toISOString().substring(0,10)
+            var novoUti = new Utilizador(utilizador)
+            return novoUti.save().then(data => callback(null, data))
+        }) 
+        .catch(erro => {
+            callback(erro, null)
+        })   
 }
 
 module.exports.apagar = email => {
@@ -32,5 +38,16 @@ module.exports.consultar = (e, callback) => {
     return Utilizador
      .findOne({email: e})
      .exec()
-     .then(data => callback(null, data))
+        .then(data => callback(null, data))
+        .catch(erro => {
+            callback(erro, null)
+        })  
+}
+
+//cada vez que faz login vai atualizar a data do último acesso para esta não ser sempre igual
+module.exports.atualizaData = (email) =>{
+    var aux = new Date().toISOString().substring(0,10)
+    return Utilizador
+            .findOneAndUpdate({email: email},{$set:{dataUltimoAcesso: aux}})
+            .exec()
 }

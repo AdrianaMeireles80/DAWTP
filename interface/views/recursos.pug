@@ -12,6 +12,10 @@ block content
         if(nivel != 0)
             .w3-btn.w3-border.w3-left.w3-blue
                 a(href='/recursoForm') Novo Recurso
+        if(nivel == 2)
+            .w3-btn.w3-border.w3-left.w3-blue
+                a(href='/tipoForm') Novo Tipo
+
         .w3-btn.w3-border.w3-right.w3-blue
             a(href='/logout') Logout
 
@@ -58,7 +62,7 @@ block content
                     th
                 
             each r in lista
-                if ((r.visibilidade || nivel == 2 || r.emailProdutor == email) && r.validado)
+                if (r.validado)
                     tr 
                         td= r.tipo
                         td= r.titulo
@@ -74,5 +78,5 @@ block content
                             td
                                 form(method='POST' action=`/recurso/${r._id}`)
                                     input(type='submit' value='Apagar')
-                        else
+                        else if (nivel != 0)
                             td

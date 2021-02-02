@@ -22,7 +22,7 @@
 
 function checkPermissao(acess){
   return function(req, res, next) {
-    if(acess == 0 || req.cookies.nAcess>=acess){
+    if(acess == 0 || req.app.get('utilizador').nivel >= acess){ // req.app.get('utilizador').nivel - recebe o nível do ficheiro 'app.js'
       console.log("Tem permissão")
       next()
     }
@@ -44,8 +44,9 @@ function checkPermissao(acess){
       2- Administrador
     */
 
-     router.get('/',function(req,res,next){
-      Recs.listar()
+     router.get('/',checkPermissao(0),function(req,res,next){
+      console.log("Fofi" + JSON.stringify(req.app.get('utilizador')))
+      Recs.listar(req.app.get('utilizador'))
          .then(dados => {
            res.jsonp(dados)
          })
@@ -54,8 +55,7 @@ function checkPermissao(acess){
          })
     })
 
-    router.get('/tipos',function(req,res,next){
-      console.log("COOKIES " + JSON.stringify(req.body))      
+    router.get('/tipos',checkPermissao(1),function(req,res,next){    
       Tipo.listar()
          .then(dados => {
            res.jsonp(dados)
@@ -66,8 +66,8 @@ function checkPermissao(acess){
     })
 
      //Get recurso
-     router.get('/:id',function(req,res,next){
-       Recs.procurar(req.params.id)
+     router.get('/:id',checkPermissao(0),function(req,res,next){
+       Recs.procurar(req.params.id, req.app.get('utilizador'))
           .then(dados => {
             res.jsonp(dados)
           })
@@ -77,7 +77,7 @@ function checkPermissao(acess){
      })
 
      //Post novo recurso
-     router.post('/',function(req,res,next){
+     router.post('/',checkPermissao(1),function(req,res,next){
        Recs.adicionar(req.body)
           .then(dados => {
             res.jsonp(dados)
@@ -87,18 +87,19 @@ function checkPermissao(acess){
           })
      })
 
-    router.post('/tipo',function(req,res,next){
+    router.post('/tipo',checkPermissao(2),function(req,res,next){
       Tipo.adicionar(req.body)
          .then(dados => {
            res.jsonp(dados)
          })
+
          .catch(erro => {
            res.status(500).jsonp(erro)
          })
     })
      
     //para o administrador aprovar a inserção de novos recursos
-    router.put('/aprovar/:id',function(req,res,next){
+    router.put('/aprovar/:id',checkPermissao(2),function(req,res,next){
       Recs.aprovar(req.params.id)
          .then(dados => {
            res.jsonp(dados)
@@ -109,8 +110,8 @@ function checkPermissao(acess){
      })
 
      //Put atualizar recurso
-     router.put('/:id',function(req,res,next){
-       Recs.editar(req.params.id,req.body)
+     router.put('/:id',checkPermissao(1),function(req,res,next){
+       Recs.editar(req.params.id,req.body, req.app.get('utilizador'))
           .then(dados => {
             res.jsonp(dados)
          })
@@ -120,8 +121,8 @@ function checkPermissao(acess){
       })
 
       //Delete apagar recurso
-      router.delete('/:id',function(req,res,next){
-        Recs.apagar(req.params.id)
+      router.delete('/:id',checkPermissao(1),function(req,res,next){
+        Recs.apagar(req.params.id, req.app.get('utilizador'))
            .then(dados => {
              res.jsonp(dados)
           })

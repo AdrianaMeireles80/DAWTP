@@ -5,6 +5,8 @@ var jwt = require('jsonwebtoken')
 
 var mongoose = require('mongoose');
 
+mongoose.set('useFindAndModify',false);
+
 var mongoDB = 'mongodb://127.0.0.1/dataDB'
 mongoose.connect(mongoDB,{useNewUrlParser: true, useUnifiedTopology: true});
 
@@ -34,6 +36,9 @@ app.use(function(req,res,next){
         res.status(401).jsonp({error: err})
       }
       else {
+        console.log("payload " + JSON.stringify(payload))
+        //para enviar o nivel para o ficheiro das routes
+        app.set('utilizador', payload)
         next()
       }
     })

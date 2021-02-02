@@ -1,11 +1,14 @@
 var createError = require('http-errors');
 var express = require('express');
 var logger = require('morgan');
+var bcrypt = require('bcryptjs')
 
 var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy
 
 var mongoose = require('mongoose');
+
+mongoose.set('useFindAndModify',false);
 
 mongoose.connect('mongodb://127.0.0.1/userDB', 
       { useNewUrlParser: true,
@@ -27,7 +30,14 @@ passport.use(new LocalStrategy(
       .then(dados => {
         const utilizador = dados
         if(!utilizador) { return done(null, false, {message: 'Utilizador inexistente!\n'})}
-        if(password != utilizador.password) { return done(null, false, {message: 'Credenciais inválidas!\n'})}
+        
+        bcrypt.compare(password, utilizador.password)
+          .then(function(resultado){
+            if(!resultado){
+               return done(null, false, {message: 'Credenciais inválidas!\n'})
+            }
+          })
+        
         return done(null, utilizador)
       })
       .catch(erro => done(erro))

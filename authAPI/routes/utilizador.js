@@ -72,22 +72,24 @@ router.get('/:email',function(req,res,next){
 
 /* POST login */
 router.post('/login', passport.authenticate('local'),function(req,res){
-    jwt.sign({email: req.body.email, password: req.body.password},
-        "DAWTP2020",
-        {expiresIn: 1800},
-        function(e,token){
-            if(e) res.status(500).jsonp({error: "Erro na geração do token" + e})
-            else {
-                Utls.procurar(req.body.email)
-                    .then(dados => {
-                        res.status(201).jsonp({token: token, nivel: dados.nivel, email: req.body.email })
-                    })
-                    .catch(erro => {
-                        console.log(erro);
-                        res.status(500).jsonp(erro)    
-                    })
-            }
-        });
+    Utls.procurar(req.body.email)
+        .then(dados => {
+            jwt.sign({ email: dados.email, password: dados.password, nivel: dados.nivel },
+                "DAWTP2020",
+                {expiresIn: 1800},
+                function(e, token){
+                    if(e)
+                        res.status(500).jsonp({error: "Erro na geração do token" + e})
+                    else{          
+                        Utls.atualizaData(req.body.email)
+                        res.status(201).jsonp({ token: token, nivel: dados.nivel, email: req.body.email })
+                    }
+                });
+        })
+        .catch(erro => {
+            console.log(erro);
+            res.status(500).jsonp(erro)    
+        })
 })
 
 /*POST criação de um novo utilizador */
@@ -100,13 +102,14 @@ router.post('/',function(req,res,next){
             res.status(406).jsonp({error: "Email já existente"})
         }
         else {
-            Utls.adicionar(req.body)
-                .then(dados => {
-                    res.status(201).jsonp(dados)
-                })
-                .catch(erro => {
-                    res.status(500).jsonp({error: erro})
-                })
+            Utls.adicionar(req.body, function(error, data){
+                if (error) {
+                    next(error)
+                }
+                else if (data) {
+                    res.status(201).jsonp(data)
+                }
+            })
         }
       })
 })

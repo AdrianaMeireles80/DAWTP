@@ -30,6 +30,13 @@ router.get('/recurso', function(req,res){
     .catch(e => res.render('error', {error : e}))
 })
 
+/*GET Type Form Page */
+router.get('/tipoForm',function(req,res,next){
+  axios.get('http://localhost:7800/recurso/tipos?token=' + req.cookies.token)
+    .then(dados => res.render('recursoTipo', { tipos: dados.data }))
+    .catch(e => res.render('error', {error : e}))  
+})
+
 router.get('/logout', function(req, res){
   res.cookie('token', "", {
     expires: new Date(Date.now() + '1s'),
@@ -61,6 +68,13 @@ router.post('/registo',function(req,res,next){
   
   axios.post('http://localhost:7700/utilizador', novoUti)
     .then(() => res.redirect('/'))   
+    .catch(err => res.status(500).render('error', {error : err}))  
+})
+
+/*POST New Type */
+router.post('/recurso/tipo',function(req,res,next){
+  axios.post('http://localhost:7800/recurso/tipo?token=' + req.cookies.token, req.body)
+    .then(() => res.redirect('/recurso'))   
     .catch(err => res.status(500).render('error', {error : err}))  
 })
 

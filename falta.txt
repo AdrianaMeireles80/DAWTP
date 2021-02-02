@@ -1,7 +1,4 @@
 O que falta fazer ? 
 
--> Permitir aos admins criar novos tipos (interface)
--> Verificar permissões dos utilizadores
--> Guardar as datas noutro tipo
 -> Permitir Editar Perfil
 -> Fazer sip, dip e aip
