@@ -16,6 +16,19 @@ router.get('/registo',function(req,res,next){
   res.render('registo')
 })
 
+/*GET Edit Profile Page */
+router.get('/editarPerfil',function(req,res,next){
+     /*
+    .then(dados => res.render('recursoForm', { tipos: dados.data }))
+    .catch(e => res.render('error', {error : e}))
+    */ 
+   console.log("EMAIL " + req.cookies.email)
+   axios.get('http://localhost:7700/utilizador/' + req.cookies.email)
+    .then(dados => res.render('editarPerfil', { uti : dados.data }))
+    .catch(e => res.render('error',{error : e}))
+  
+})
+
 /*GET Resource Form Page */
 router.get('/recursoForm',function(req,res,next){
   axios.get('http://localhost:7800/recurso/tipos?token=' + req.cookies.token)
@@ -37,6 +50,7 @@ router.get('/tipoForm',function(req,res,next){
     .catch(e => res.render('error', {error : e}))  
 })
 
+/*GET Logout */
 router.get('/logout', function(req, res){
   res.cookie('token', "", {
     expires: new Date(Date.now() + '1s'),
@@ -58,6 +72,7 @@ router.get('/logout', function(req, res){
   res.redirect('/')
 })
 
+/*GET download de um ficheiro */
 router.get('/recurso/download/:fname', function(req,res){
   res.download(__dirname + '/../public/fileStore/' + req.params.fname )
 })
@@ -69,6 +84,19 @@ router.post('/registo',function(req,res,next){
   axios.post('http://localhost:7700/utilizador', novoUti)
     .then(() => res.redirect('/'))   
     .catch(err => res.status(500).render('error', {error : err}))  
+})
+
+/*POST Editar Perfil */
+router.post('/editarPerfil', function(req,res,next){
+
+  console.log("CORPO:" + JSON.stringify(req.body))
+  console.log("EMAIL:" + JSON.stringify(req.cookies.email))
+
+  var utiAtu = req.body
+
+  axios.put('http://localhost:7700/utilizador/' + req.cookies.email, utiAtu)
+    .then(() => res.redirect('/recurso'))   
+    .catch(err => res.status(500).render('error', {error : err}))
 })
 
 /*POST New Type */
@@ -139,6 +167,7 @@ router.post('/login', function(req,res){
     .catch(e => res.render('error', {error : e }))
 });
 
+/*POST para administrador aprovar recurso */
 router.post('/recurso/aprovar/:id', function(req, res, next){
   axios.put('http://localhost:7800/recurso/aprovar/' + req.params.id + '?token=' + req.cookies.token)
   .then(() => res.redirect('/recurso'))

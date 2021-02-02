@@ -28,10 +28,24 @@ module.exports.apagar = email => {
     return Utilizador.findOneAndDelete({email: email}).exec()
 }
 
-module.exports.editar = (email,utilizador) =>{
-    return Utilizador
-            .findOneAndUpdate({email: email},{$set:{nome: utilizador.nome,filiacao: utilizador.filiacao,password:utilizador.password}})
-            .exec()
+module.exports.editar = (email,utilizador, callback) =>{
+    if(utilizador.password != ""){
+        bcrypt.hash(utilizador.password,6)
+        .then(function(hash){
+            utilizador.password = hash
+            return Utilizador
+                .findOneAndUpdate({email: email},{$set:{nome: utilizador.nome,filiacao: utilizador.filiacao,password:utilizador.password}})
+                .exec().then(data => callback(null, data))
+        }) 
+        .catch(erro => {
+            callback(erro, null)
+        }) 
+    }
+    else{
+        return Utilizador
+            .findOneAndUpdate({email: email},{$set:{nome: utilizador.nome,filiacao: utilizador.filiacao}})
+            .exec().then(data => callback(null, data))
+    }
 }
 
 module.exports.consultar = (e, callback) => {

@@ -1,4 +1,7 @@
 O que falta fazer ? 
 
--> Permitir Editar Perfil
+-> ranking (adicionar um atributo de likes e depois ordenar por ordem decrescente de gostos)
+-> taxonomia (diferentes ordenações ao clicar)
 -> Fazer sip, dip e aip
+-> Permitir que um utilizador faça um Post sobre um recurso;
+-> Permitir que os outros utilizadores comentem Posts;

@@ -74,7 +74,7 @@ router.get('/:email',function(req,res,next){
 router.post('/login', passport.authenticate('local'),function(req,res){
     Utls.procurar(req.body.email)
         .then(dados => {
-            jwt.sign({ email: dados.email, password: dados.password, nivel: dados.nivel },
+            jwt.sign({ email: dados.email, password: dados.password, nivel: dados.nivel }, //nivel para ser usado no backend 
                 "DAWTP2020",
                 {expiresIn: 1800},
                 function(e, token){
@@ -82,7 +82,7 @@ router.post('/login', passport.authenticate('local'),function(req,res){
                         res.status(500).jsonp({error: "Erro na geração do token" + e})
                     else{          
                         Utls.atualizaData(req.body.email)
-                        res.status(201).jsonp({ token: token, nivel: dados.nivel, email: req.body.email })
+                        res.status(201).jsonp({ token: token, nivel: dados.nivel, email: req.body.email }) //nivel para ser usado na interface
                     }
                 });
         })
@@ -116,14 +116,14 @@ router.post('/',function(req,res,next){
 
 /*PUT modificar utilizador */
 router.put('/:email',function(req,res,next){
-    Utls.editar(req.params.email,req.body)
-        .then(dados => {
-            res.jsonp(dados)
-        })
-        .catch(erro => {
-            console.log(erro);
-            res.status(500).jsonp(erro)
-        })
+    Utls.editar(req.params.email,req.body, function(error, data){
+        if (error) {
+            next(error)
+        }
+        else if (data) {
+            res.status(201).jsonp(data)
+        }
+    })
 })
 
 /*PUT modificar passe do utilizador */
