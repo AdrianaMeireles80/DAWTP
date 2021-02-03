@@ -1,7 +1,7 @@
 O que falta fazer ? 
 
 -> ranking (adicionar um atributo de likes e depois ordenar por ordem decrescente de gostos) (feito)
--> taxonomia (diferentes ordenações ao clicar)
+-> taxonomia (diferentes ordenações ao clicar) (search-bar by type )
 -> Fazer sip, dip e aip
 -> Permitir que um utilizador faça um Post sobre um recurso;
 -> Permitir que os outros utilizadores comentem Posts;

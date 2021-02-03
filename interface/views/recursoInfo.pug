@@ -1,0 +1,64 @@
+extends layout
+
+block content
+    center
+        .w3-container.w3-margin.w3-center(style="height:350px;width:40%;margin:auto;")
+            .w3-card-4.w3-white.w3-border.w3-border-lime
+                header.w3-container.w3-margin-top
+                    .w3-lime
+                        h2 #{recurso.titulo}
+                    .w3-container
+                        div
+                            b Subtítulo: 
+                            | #{recurso.subtitulo}
+
+                        div
+                            b Tipo(s): 
+                            | #{recurso.tipo[0]}
+                            - var i = 1
+                            while i < recurso.tipo.length
+                                | , #{recurso.tipo[i]}
+                                - i++
+                        
+                        div
+                            b Utilizador que inseriu: 
+                            | #{recurso.nomeProdutor}
+                        
+                        div
+                            b Email do Utilizador: 
+                            | #{recurso.emailProdutor}
+
+                        div
+                            b Visibilidade: 
+                            if(recurso.visibilidade)
+                                | Público
+                            else
+                                | Privado
+                      
+                        div
+                            b Data de Criação: 
+                            | #{recurso.dataCriacao}
+
+                        div
+                            b Data de Registo: 
+                            | #{recurso.dataRegisto}
+                    
+                    .w3-container.w3-margin
+                        if(recurso.likes.includes(email))
+                            form.w3-third(method='POST' action=`/recurso/like/${recurso._id}` )
+                                input(type='submit' value=`${(recurso.likes).length} Likes` style="background-color:#ff9900; color: white")
+                        else
+                            form.w3-third(method='POST' action=`/recurso/like/${recurso._id}` )
+                                input(type='submit' value=`${(recurso.likes).length} Likes` style="background-color:white; color: black")
+                        
+                        form.w3-third(method='GET' action=`/recurso/download/${recurso.nomeFicheiro}`)
+                            input(type='submit' value='Download' style="background-color:#99bbff; color: white")
+
+                        if (nivel == 2 || recurso.emailProdutor == email)
+                            form.w3-third(method='POST' action=`/recurso/${recurso._id}`)
+                                input(type='submit' value='Apagar' style="background-color:#e60000; color: white")                   
+                        
+                footer.w3-container
+                    address.w3-right
+                        a(href="/recurso") 
+                            button.w3-button.w3-margin Voltar

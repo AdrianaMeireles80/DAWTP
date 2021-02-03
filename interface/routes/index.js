@@ -38,6 +38,7 @@ router.get('/recursoForm',function(req,res,next){
 
 function dynamicSort(property) {
   var sortOrder = 1;
+  //ordenação decrescente
   if(property[0] === "-") {
       sortOrder = -1;
       property = property.substr(1);
@@ -125,6 +126,13 @@ router.get('/recurso/download/:fname', function(req,res){
   res.download(__dirname + '/../public/fileStore/' + req.params.fname )
 })
 
+/*GET da informação toda de um recurso ao clicar nele */
+router.get('/recurso/:id',function(req,res,next){
+  axios.get('http://localhost:7800/recurso/' + req.params.id + '?token=' + req.cookies.token)
+    .then(dados => res.render('recursoInfo', { recurso: dados.data, nivel: req.cookies.nivel, email: req.cookies.email }))
+    .catch(e => res.render('error', {error : e}))  
+})
+
 /*POST Register Page */
 router.post('/registo',function(req,res,next){
   var novoUti = req.body
@@ -147,7 +155,7 @@ router.post('/editarPerfil', function(req,res,next){
 router.post('/recurso/like/:id', function(req,res,next){
 
   axios.post('http://localhost:7800/recurso/like/' + req.params.id + '?token=' + req.cookies.token, req.cookies)
-    .then(() => res.redirect('/recurso'))   
+    .then(() => res.redirect('back'))   
     .catch(err => res.status(500).render('error', {error : err})) 
 
 })

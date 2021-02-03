@@ -87,7 +87,8 @@ block content
                 if (r.validado)
                     tr 
                         td= r.tipo
-                        td= r.titulo
+                        td
+                             a(href=`/recurso/${r._id}`) #{r.titulo}
                         td= r.subtitulo
                         td= r.nomeProdutor
                         td= r.dataCriacao
