@@ -1,6 +1,6 @@
 O que falta fazer ? 
 
--> ranking (adicionar um atributo de likes e depois ordenar por ordem decrescente de gostos)
+-> ranking (adicionar um atributo de likes e depois ordenar por ordem decrescente de gostos) (feito)
 -> taxonomia (diferentes ordenações ao clicar)
 -> Fazer sip, dip e aip
 -> Permitir que um utilizador faça um Post sobre um recurso;

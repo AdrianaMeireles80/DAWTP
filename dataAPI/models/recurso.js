@@ -11,7 +11,9 @@ var recursoSchema = new mongoose.Schema({
     nomeProdutor: String,
     emailProdutor: String,
     nomeFicheiro : String,
-    validado: Boolean
+    validado: Boolean,
+    likes: [String]
+
 })
 
 module.exports = mongoose.model('recurso',recursoSchema)

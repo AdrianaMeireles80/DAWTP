@@ -97,6 +97,18 @@ function checkPermissao(acess){
            res.status(500).jsonp(erro)
          })
     })
+
+    router.post('/like/:id',checkPermissao(0), function(req,res,next){
+      console.log(JSON.stringify(req.body.email))
+      Recs.adicionarLike(req.params.id, req.body.email, function(err, data) {
+        if (err) {
+          next(err)
+        }
+        else if (data) {
+          res.status(201).jsonp(data)
+        }
+      })
+    })
      
     //para o administrador aprovar a inserção de novos recursos
     router.put('/aprovar/:id',checkPermissao(2),function(req,res,next){

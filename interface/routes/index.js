@@ -36,10 +36,36 @@ router.get('/recursoForm',function(req,res,next){
     .catch(e => res.render('error', {error : e}))  
 })
 
+function dynamicSort(property) {
+  var sortOrder = 1;
+  if(property[0] === "-") {
+      sortOrder = -1;
+      property = property.substr(1);
+  }
+  return function (a,b) {
+      /* next line works with strings and numbers, 
+       * and you may want to customize it to your needs
+       */
+      var result
+
+      if (property == "likes")
+          result = (a[property].length < b[property].length) ? -1 : (a[property].length > b[property].length) ? 1 : 0;
+      else
+          result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+
+      return result * sortOrder;
+  }
+}
+
 /*GET Resource Page */
 router.get('/recurso', function(req,res){
   axios.get('http://localhost:7800/recurso?token=' + req.cookies.token)
-    .then(dados => res.render('recursos', { lista: dados.data, nivel: req.cookies.nivel, email: req.cookies.email }))
+    .then(dados => {
+      if(req.query.orderBy != null && req.query.orderBy != "")
+        dados.data.sort(dynamicSort(req.query.orderBy))
+      
+      res.render('recursos', { lista: dados.data, nivel: req.cookies.nivel, email: req.cookies.email })
+    })
     .catch(e => res.render('error', {error : e}))
 })
 
@@ -88,15 +114,20 @@ router.post('/registo',function(req,res,next){
 
 /*POST Editar Perfil */
 router.post('/editarPerfil', function(req,res,next){
-
-  console.log("CORPO:" + JSON.stringify(req.body))
-  console.log("EMAIL:" + JSON.stringify(req.cookies.email))
-
   var utiAtu = req.body
 
   axios.put('http://localhost:7700/utilizador/' + req.cookies.email, utiAtu)
     .then(() => res.redirect('/recurso'))   
     .catch(err => res.status(500).render('error', {error : err}))
+})
+
+/*POST Pôr gosto no recurso */
+router.post('/recurso/like/:id', function(req,res,next){
+
+  axios.post('http://localhost:7800/recurso/like/' + req.params.id + '?token=' + req.cookies.token, req.cookies)
+    .then(() => res.redirect('/recurso'))   
+    .catch(err => res.status(500).render('error', {error : err})) 
+
 })
 
 /*POST New Type */

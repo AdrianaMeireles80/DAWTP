@@ -86,3 +86,33 @@ module.exports.editar = (id, rec, utilizador) =>{
                 .exec()
     }
 }
+
+module.exports.adicionarLike = (id,email, callback) => {
+    Recurso.findOne({_id: id})
+        .then(recurso => {
+            if(recurso.likes.includes(email)){
+                var i = recurso.likes.indexOf(email)
+                recurso.likes.splice(i, 1)
+                return Recurso
+                        .findOneAndUpdate({_id: id},{$set:{likes: recurso.likes}})
+                        .exec()
+                        .then(data => callback(null, data))
+                        .catch(erro => {
+                            callback(erro, null)
+                        })
+            }
+            else{
+                recurso.likes.push(email)
+                return Recurso
+                        .findOneAndUpdate({_id: id},{$set:{likes: recurso.likes}})
+                        .exec()
+                        .then(data => callback(null, data))
+                        .catch(erro => {
+                            callback(erro, null)
+                        })
+            }
+        })
+        .catch(err => {
+            callback(err, null)
+        })
+}

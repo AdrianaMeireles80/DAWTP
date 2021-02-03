@@ -5,19 +5,21 @@ block content
         h1 
             b Lista de Recursos
     
-    .w3-container.w3-margin.w3-right
-        a(href='/editarPerfil') Conta de #{email}
+    .w3-container.w3-margin.w3-right Conta de #{email}
 
     .w3-container.w3-margin
         if(nivel != 0)
             .w3-btn.w3-border.w3-left.w3-blue
                 a(href='/recursoForm') Novo Recurso
         if(nivel == 2)
-            .w3-btn.w3-border.w3-left.w3-blue
-                a(href='/tipoForm') Novo Tipo
+            .w3-btn.w3-border.w3-left.w3-blue(style="margin-left: 40px")
+                a(href='/tipoForm') Novo Tipo       
 
         .w3-btn.w3-border.w3-right.w3-blue
             a(href='/logout') Logout
+
+        .w3-btn.w3-border.w3-right.w3-blue(style="margin-right: 40px")
+            a(href='/editarPerfil') Editar Perfil        
 
     if(nivel == 2)
         .w3-container.w3-margin
@@ -43,20 +45,28 @@ block content
                                 td= r.dataRegisto
                                 td
                                     form(method='POST' action=`/recurso/aprovar/${r._id}`)
-                                        input(type='submit' value='Aprovado')
+                                        input(type='submit' value='Aprovado' style="background-color:#00b359; color: white;")
                                 td
                                     form(method='POST' action=`/recurso/${r._id}`)
-                                        input(type='submit' value='Não Aprovado')
+                                        input(type='submit' value='Não Aprovado' style="background-color:#ff3333; color: white;")
         
     .w3-container.w3-margin
         table.w3-table-all
             tr.w3-blue
-                th Tipo
-                th Titulo
-                th Subtitulo
-                th Utilizador
-                th Data de Criação
-                th Data de Registo
+                th
+                    a(href='/recurso?orderBy=tipo') Tipo
+                th
+                    a(href='/recurso?orderBy=titulo') Titulo
+                th 
+                    a(href='/recurso?orderBy=subtitulo') Subtitulo
+                th 
+                    a(href='/recurso?orderBy=nomeProdutor') Utilizador
+                th 
+                    a(href='/recurso?orderBy=-dataCriacao') Data de Criação
+                th 
+                    a(href='/recurso?orderBy=-dataRegisto') Data de Registo
+                th 
+                    a(href='/recurso?orderBy=-likes') Gostos
                 th
                 if (nivel != 0)
                     th
@@ -71,12 +81,19 @@ block content
                         td= r.dataCriacao
                         td= r.dataRegisto
                         td
+                            if(r.likes.includes(email))
+                                form(method='POST' action=`/recurso/like/${r._id}` )
+                                    input(type='submit' value=`${(r.likes).length} Likes` style="background-color:#ffa64d; color: white;")
+                            else
+                                form(method='POST' action=`/recurso/like/${r._id}` )
+                                    input(type='submit' value=`${(r.likes).length} Likes` style="background-color:white; color: black;")
+                        td
                             form(method='GET' action=`/recurso/download/${r.nomeFicheiro}`)
-                                input(type='submit' value='Download')
+                                input(type='submit' value='Download' style="background-color:#999999; color: white;")
 
                         if (nivel == 2 || r.emailProdutor == email)
                             td
                                 form(method='POST' action=`/recurso/${r._id}`)
-                                    input(type='submit' value='Apagar')
+                                    input(type='submit' value='Apagar' style="background-color:#ff3333; color: white;")
                         else if (nivel != 0)
                             td
