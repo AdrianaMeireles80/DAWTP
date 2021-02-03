@@ -64,6 +64,28 @@ router.get('/recurso', function(req,res){
       if(req.query.orderBy != null && req.query.orderBy != "")
         dados.data.sort(dynamicSort(req.query.orderBy))
       
+        //search bar
+      if(req.query.search != null && req.query.search != "" && req.query.searchBy != null && req.query.searchBy != ""){
+        var aux = []
+
+        dados.data.forEach(s => {
+          if(req.query.searchBy == "tipo"){
+            for(i = 0; i < s[req.query.searchBy].length; i++){
+              if(s[req.query.searchBy][i].includes(req.query.search)){
+                aux.push(s)
+                break
+              }
+            }
+          }
+
+          else if(s[req.query.searchBy].includes(req.query.search)){
+            aux.push(s)
+          }
+        })
+
+        dados.data = aux
+      }
+      
       res.render('recursos', { lista: dados.data, nivel: req.cookies.nivel, email: req.cookies.email })
     })
     .catch(e => res.render('error', {error : e}))
