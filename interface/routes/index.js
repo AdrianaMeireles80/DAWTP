@@ -83,9 +83,11 @@ router.get('/recurso', function(req,res){
         })
 
         dados.data = aux
+
+        res.render('recursos', { lista: dados.data, nivel: req.cookies.nivel, email: req.cookies.email, search: req.query.search, searchBy: req.query.searchBy })
       }
-      
-      res.render('recursos', { lista: dados.data, nivel: req.cookies.nivel, email: req.cookies.email })
+      else
+        res.render('recursos', { lista: dados.data, nivel: req.cookies.nivel, email: req.cookies.email })
     })
     .catch(e => res.render('error', {error : e}))
 })
@@ -151,8 +153,15 @@ router.post('/editarPerfil', function(req,res,next){
 
 /*POST Pôr gosto no recurso */
 router.post('/recurso/like/:id', function(req,res,next){
+  axios.post('http://localhost:7800/recurso/like/' + req.params.id + '?token=' + req.cookies.token)
+    .then(() => res.redirect('back'))   
+    .catch(err => res.status(500).render('error', {error : err})) 
 
-  axios.post('http://localhost:7800/recurso/like/' + req.params.id + '?token=' + req.cookies.token, req.cookies)
+})
+
+/*POST Pôr comentário no recurso */
+router.post('/recurso/comentario/:id', function(req,res,next){
+  axios.post('http://localhost:7800/recurso/comentario/' + req.params.id + '?token=' + req.cookies.token, req.body)
     .then(() => res.redirect('back'))   
     .catch(err => res.status(500).render('error', {error : err})) 
 
@@ -225,6 +234,13 @@ router.post('/login', function(req,res){
     })
     .catch(e => res.render('error', {error : e }))
 });
+
+//POST apagar um comentário num recurso
+router.post('/recurso/comentario/apagar/:id', function(req, res, next){
+  axios.delete('http://localhost:7800/recurso/comentario/apagar/' + req.params.id + '?token=' + req.cookies.token, {data: req.body})
+    .then(() => res.redirect('back'))
+    .catch(err => res.status(500).render('error', {error: err}))
+})
 
 /*POST para administrador aprovar recurso */
 router.post('/recurso/aprovar/:id', function(req, res, next){

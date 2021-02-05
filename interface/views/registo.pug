@@ -12,24 +12,24 @@ block content
                     form.w3-container(action='/registo' method="POST")
                         label
                             b Nome
-                        input.w3-input.w3-border(type="text", name="nome")
+                        input.w3-input.w3-border(type="text", name="nome" required)
                         label
                             b Email
-                        input.w3-input.w3-border(type="text", name="email")
+                        input.w3-input.w3-border(type="text", name="email" required)
                         label
                             b Filiação
                         input.w3-input.w3-border(type="text", name="filiacao")
                         label
                             
                             b Nível
-                        select.w3-select.w3-border(name="nivel")
+                        select.w3-select.w3-border(name="nivel" required)
                             option(value="0") Consumidor
                             option(value="1") Produtor
                         
 
                         label
                             b Password
-                        input.w3-input.w3-border(type="password", name="password")                        
+                        input.w3-input.w3-border(type="password", name="password" required)                        
 
                         input.w3-btn.w3-border.w3-margin.w3-lime(type="submit", value="Inserir")
                         input.w3-btn.w3-border.w3-margin.w3-lime(type="reset", value="Limpar valores")

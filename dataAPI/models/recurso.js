@@ -12,7 +12,8 @@ var recursoSchema = new mongoose.Schema({
     emailProdutor: String,
     nomeFicheiro : String,
     validado: Boolean,
-    likes: [String]
+    likes: [String],
+    comentarios: [{nome: String, comentario: String}]
 
 })
 

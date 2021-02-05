@@ -1,24 +1,7 @@
- 
-      
-      /*
-      -> GET
-
-      - recursos/:id
-  
-  
-        -> POST
-  
-      - recursos/
-  
-        -> PUT
-  
-      - recursos/:id 
-  
-        -> DELETE
-      
-      - recursos/:id
-
-      */
+var express = require('express');
+var router = express.Router();
+var Recs = require('../controllers/recurso');
+var Tipo = require('../controllers/tipo');
 
 function checkPermissao(acess){
   return function(req, res, next) {
@@ -31,20 +14,14 @@ function checkPermissao(acess){
       res.status(401).jsonp("Não tem permissão")
     }
   }
-}
-
-     var express = require('express');
-     var router = express.Router();
-     var Recs = require('../controllers/recurso');
-     var Tipo = require('../controllers/tipo');
-  
+}  
     /*
       0-Consumidor
       1- Produtor
       2- Administrador
     */
 
-     router.get('/',checkPermissao(0),function(req,res,next){
+router.get('/',checkPermissao(0),function(req,res,next){
       Recs.listar(req.app.get('utilizador'))
          .then(dados => {
            res.jsonp(dados)
@@ -98,8 +75,8 @@ function checkPermissao(acess){
     })
 
     router.post('/like/:id',checkPermissao(0), function(req,res,next){
-      console.log(JSON.stringify(req.body.email))
-      Recs.adicionarLike(req.params.id, req.body.email, function(err, data) {
+     
+      Recs.adicionarLike(req.params.id, req.app.get('utilizador').email, function(err, data) {
         if (err) {
           next(err)
         }
@@ -107,6 +84,16 @@ function checkPermissao(acess){
           res.status(201).jsonp(data)
         }
       })
+    })
+
+    router.post('/comentario/:id',checkPermissao(0),function(req,res,next){
+      Recs.adicionarComentario(req.params.id, req.app.get('utilizador').nome, req.body.comentario)
+        .then(dados => {
+          res.jsonp(dados)
+        })
+        .catch(erro => {
+          res.status(500).jsonp(erro)
+        })
     })
      
     //para o administrador aprovar a inserção de novos recursos
@@ -126,6 +113,17 @@ function checkPermissao(acess){
           .then(dados => {
             res.jsonp(dados)
          })
+          .catch(erro => {
+            res.status(500).jsonp(erro)
+          })
+      })
+
+      //Delete apagar um comentário
+      router.delete('/comentario/apagar/:id', checkPermissao(1), function(req, res, next){
+        Recs.apagarComentario(req.params.id, req.body.nome, req.body.comentario, req.app.get('utilizador'))
+          .then(dados => {
+            res.jsonp(dados)
+          })
           .catch(erro => {
             res.status(500).jsonp(erro)
           })

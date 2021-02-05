@@ -1,6 +1,15 @@
 extends layout 
 
 block content
+
+    - var url = "/recurso?"
+    if(search != undefined && searchBy != undefined)
+        - url += "search="
+        - url += search
+        - url += "&searchBy="
+        - url += searchBy
+        - url += "&"
+
     w3-container.w3-center 
         h1(style="color: #ffffff")
             b Gestão de Recursos    
@@ -66,19 +75,19 @@ block content
         table.w3-table-all
             tr.w3-lime
                 th
-                    a(href='/recurso?orderBy=tipo') Tipo
+                    a(href=`${url}orderBy=tipo`) Tipo
                 th
-                    a(href='/recurso?orderBy=titulo') Titulo
+                    a(href=`${url}orderBy=titulo`) Titulo
                 th 
-                    a(href='/recurso?orderBy=subtitulo') Subtitulo
+                    a(href=`${url}orderBy=subtitulo`) Subtitulo
                 th 
-                    a(href='/recurso?orderBy=nomeProdutor') Utilizador
+                    a(href=`${url}orderBy=nomeProdutor`) Utilizador
                 th 
-                    a(href='/recurso?orderBy=-dataCriacao') Data de Criação
+                    a(href=`${url}orderBy=-dataCriacao`) Data de Criação
                 th 
-                    a(href='/recurso?orderBy=-dataRegisto') Data de Registo
+                    a(href=`${url}orderBy=-dataRegisto`) Data de Registo
                 th 
-                    a(href='/recurso?orderBy=-likes') Gostos
+                    a(href=`${url}orderBy=-likes`) Gostos
                 th
                 if (nivel != 0)
                     th

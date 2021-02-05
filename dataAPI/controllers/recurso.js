@@ -87,7 +87,7 @@ module.exports.editar = (id, rec, utilizador) =>{
     }
 }
 
-module.exports.adicionarLike = (id,email, callback) => {
+module.exports.adicionarLike = (id, email, callback) => {
     Recurso.findOne({_id: id})
         .then(recurso => {
             if(recurso.likes.includes(email)){
@@ -115,4 +115,23 @@ module.exports.adicionarLike = (id,email, callback) => {
         .catch(err => {
             callback(err, null)
         })
+}
+
+module.exports.adicionarComentario = (id, n, c) => {
+    return Recurso
+            .findOneAndUpdate({_id: id},{$push:{comentarios: {nome: n, comentario: c}}})
+            .exec()
+}
+
+module.exports.apagarComentario = (id, n, c, utilizador) => {
+    if(utilizador.nivel == 1){
+        return Recurso
+                .findOneAndUpdate({_id: id, emailProdutor: utilizador.email}, {$pull:{comentarios: {nome: n, comentario: c}}})
+                .exec()
+    }
+    else if(utilizador.nivel == 2){
+        return Recurso
+                .findOneAndUpdate({_id: id}, {$pull:{comentarios: {nome: n, comentario: c}}})
+                .exec()
+    }
 }
