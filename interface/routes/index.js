@@ -184,8 +184,6 @@ router.post('/recurso', upload.array('myfile',12), function(req,res){
 
       novoRec.nomeProdutor = uti.nome
       novoRec.emailProdutor = uti.email
-      
-      console.log("REQFILES " + JSON.stringify(req.files))
       req.files.forEach(reqfile => {
     
         novoRec.nomeFicheiro = reqfile.originalname
@@ -232,7 +230,7 @@ router.post('/login', function(req,res){
       })
       res.redirect('/recurso')
     })
-    .catch(e => res.render('error', {error : e }))
+    .catch( () => res.redirect('/'))
 });
 
 //POST apagar um comentário num recurso

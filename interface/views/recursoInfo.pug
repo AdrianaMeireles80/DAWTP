@@ -76,7 +76,7 @@ block content
                         | #{c.comentario}
                         if(nivel == 2 || recurso.emailProdutor == email)
                             form.w3-right(action=`/recurso/comentario/apagar/${recurso._id}` method="POST")
-                                input.w3-input.w3-border(type="submit" value="X" style="background-color:#e60000; color: white; height: 40px")
+                                input(type="submit" value="X" style="background-color:#e60000; color: white; height: 25px")
                                 input(type="hidden" name="nome" value =c.nome)
                                 input(type="hidden" name="comentario" value =c.comentario)
                         
