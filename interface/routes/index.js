@@ -18,10 +18,7 @@ router.get('/registo',function(req,res,next){
 
 /*GET Edit Profile Page */
 router.get('/editarPerfil',function(req,res,next){
-     /*
-    .then(dados => res.render('recursoForm', { tipos: dados.data }))
-    .catch(e => res.render('error', {error : e}))
-    */ 
+
    console.log("EMAIL " + req.cookies.email)
    axios.get('http://localhost:7700/utilizador/' + req.cookies.email)
     .then(dados => res.render('editarPerfil', { uti : dados.data }))
@@ -62,10 +59,11 @@ function dynamicSort(property) {
 router.get('/recurso', function(req,res){
   axios.get('http://localhost:7800/recurso?token=' + req.cookies.token)
     .then(dados => {
+      //para ordenar tipo/titulo/subtitulo.. quando se clica neles
       if(req.query.orderBy != null && req.query.orderBy != "")
         dados.data.sort(dynamicSort(req.query.orderBy))
       
-        //search bar
+      //search bar
       if(req.query.search != null && req.query.search != "" && req.query.searchBy != null && req.query.searchBy != ""){
         var aux = []
 

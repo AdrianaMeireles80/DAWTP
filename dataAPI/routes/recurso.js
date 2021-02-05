@@ -45,7 +45,6 @@ function checkPermissao(acess){
     */
 
      router.get('/',checkPermissao(0),function(req,res,next){
-      console.log("Fofi" + JSON.stringify(req.app.get('utilizador')))
       Recs.listar(req.app.get('utilizador'))
          .then(dados => {
            res.jsonp(dados)

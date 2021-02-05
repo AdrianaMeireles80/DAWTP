@@ -6,7 +6,8 @@ block content
             .w3-card-4.w3-white.w3-border.w3-border-lime
                 header.w3-container.w3-margin-top
                     .w3-lime
-                        h2 Inserir Novo Recurso
+                        h3 
+                            b Inserir Novo Recurso
                     .w3-container
                         form.w3-container(action='/recurso' enctype="multipart/form-data" method="POST")
                             label
@@ -37,8 +38,8 @@ block content
                                 b Ficheiro a anexar:
                                 input.w3-input.w3-border(type="file" name="myfile" required)                  
 
-                            input.w3-btn.w3-lime.w3-border.w3-margin(type="submit", value="Inserir")
-                            input.w3-btn.w3-lime.w3-border.w3-margin(type="reset", value="Limpar valores")
+                            input.w3-btn.w3-lime.w3-border.w3-margin.w3-lime(type="submit", value="Inserir")
+                            input.w3-btn.w3-lime.w3-border.w3-margin.w3-lime(type="reset", value="Limpar valores")
 
                 footer.w3-container
                     address.w3-right

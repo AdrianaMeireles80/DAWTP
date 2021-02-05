@@ -9,13 +9,16 @@ block content
   center
     .w3-container.w3-white.w3-margin.w3-border.w3-border-lime.w3-center(style="height:350px;width:40%;margin:auto;")
       .w3-lime
-        h3 Introduza as suas credenciais:
+        h3 
+          b Introduza as suas credenciais:
 
       form.w3-container(action='/login', method='POST' style="height:200px;width:50%;margin:auto;")
-        label Email:
+        label 
+          b Email:
           input.w3-input(type="text" name="email" required)
 
-        label Password:
+        label 
+          b Password:
           input.w3-input(type="password" name="password" required)
 
         input.w3-btn.w3-lime(type="submit" value="Login" style="margin-top:20px;")

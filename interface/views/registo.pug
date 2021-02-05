@@ -1,10 +1,13 @@
 extends layout
 
 block content
-    .w3-container
-        .w3-card-4
+  center
+    .w3-container.w3-margin.w3-center(style="height:350px;width:40%;margin:auto;")
+        .w3-card-4.w3-white
             header.w3-container.w3-margin-top
-                h3 Registo 
+                .w3-lime
+                    h3 
+                        b Registo 
                 .w3-container
                     form.w3-container(action='/registo' method="POST")
                         label
@@ -28,8 +31,8 @@ block content
                             b Password
                         input.w3-input.w3-border(type="password", name="password")                        
 
-                        input.w3-btn.w3-border.w3-margin(type="submit", value="Inserir")
-                        input.w3-btn.w3-border.w3-margin(type="reset", value="Limpar valores")
+                        input.w3-btn.w3-border.w3-margin.w3-lime(type="submit", value="Inserir")
+                        input.w3-btn.w3-border.w3-margin.w3-lime(type="reset", value="Limpar valores")
 
             footer.w3-container
                 address.w3-right

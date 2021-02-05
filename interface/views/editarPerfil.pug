@@ -7,7 +7,8 @@ block content
 
                 header.w3-container.w3-margin-top
                     .w3-lime
-                        h3 Editar Perfil 
+                        h3 
+                            b Editar Perfil 
                     .w3-container
                         form.w3-container(action='/editarPerfil' method="POST")
                             label
@@ -22,7 +23,7 @@ block content
                                 b Password
                             input.w3-input.w3-border(type="password", name="password")                        
 
-                            input.w3-btn.w3-border.w3-margin(type="submit", value="Atualizar")
+                            input.w3-btn.w3-border.w3-margin.w3-lime(type="submit", value="Atualizar")
 
 
                 footer.w3-container
