@@ -53,7 +53,6 @@ passport.serializeUser((utilizador, done) => {
     
 // Desserialização: a partir do id obtem-se a informação do utilizador
 passport.deserializeUser((email, done) => {
-    console.log('Desserielização, email: ' + email)
     Utilizador.procurar(email)
         .then(dados => done(null, dados))
         .catch(erro => done(erro, false))
