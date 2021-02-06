@@ -68,8 +68,9 @@ block content
                                 td
                                     form(method='POST' action=`/recurso/aprovar/${r._id}`)
                                         input(type='submit' value='Aprovado' style="background-color:#009900; color: white;")
+                                        input(type="hidden" name="nomeFicheiro" value=r.nomeFicheiro)
                                 td
-                                    form(method='POST' action=`/recurso/${r._id}`)
+                                    form(method='POST' action=`/recurso/naoaprovar/${r._id}`)
                                         input(type='submit' value='Não Aprovado' style="background-color:#e60000; color: white;")
         
     .w3-container.w3-margin

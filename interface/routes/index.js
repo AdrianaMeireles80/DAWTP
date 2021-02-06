@@ -183,7 +183,7 @@ router.post('/recurso', upload.array('myfile',12), function(req,res){
         
                 novoRec.nomeFicheiro = reqfile.originalname
                 let oldPath = __dirname + '/../' + reqfile.path
-                let newPath = __dirname + '/../public/fileStore/' + reqfile.originalname
+                let newPath = __dirname + '/../public/fileWaiting/' + reqfile.originalname
 
                 fs.rename(oldPath,newPath,function(err){
                     if(err)
@@ -237,9 +237,19 @@ router.post('/recurso/comentario/apagar/:id', function(req, res, next){
 
 /* POST administrador aprovar recurso */
 router.post('/recurso/aprovar/:id', function(req, res, next){
-    axios.put('http://localhost:7800/recurso/aprovar/' + req.params.id + '?token=' + req.cookies.token)
-    .then(() => res.redirect('/recurso'))
-    .catch(err => res.status(500).render('error', {error: err}))
+    let oldPath = __dirname + '/../public/fileWaiting/' + req.body.nomeFicheiro
+    let newPath = __dirname + '/../public/fileStore/' + req.body.nomeFicheiro
+
+    fs.rename(oldPath,newPath,function(err){
+        if(err)
+            throw err
+
+        else {
+            axios.put('http://localhost:7800/recurso/aprovar/' + req.params.id + '?token=' + req.cookies.token)
+                .then(() => res.redirect('/recurso'))
+                .catch(err => res.status(500).render('error', {error: err}))
+        }
+    })
 })
 
 /*POST apagar recurso (utiliza-se POST por causa do form do outro lado)*/
@@ -247,6 +257,22 @@ router.post('/recurso/:id',function(req,res,next){
     axios.delete('http://localhost:7800/recurso/' + req.params.id + '?token=' + req.cookies.token)
         .then(dados =>{
             var path = __dirname + '/../public/fileStore/' + dados.data.nomeFicheiro
+            fs.unlink(path, (err) =>{
+                if(err){
+                    res.status(500).render('error', {error: err})
+                }
+                else
+                    res.redirect('/recurso')
+            })            
+        })
+        .catch(err => res.status(500).render('error', {error: err}))
+})
+
+/*POST apagar nao aprovado recurso (utiliza-se POST por causa do form do outro lado)*/
+router.post('/recurso/naoaprovar/:id',function(req,res,next){
+    axios.delete('http://localhost:7800/recurso/' + req.params.id + '?token=' + req.cookies.token)
+        .then(dados =>{
+            var path = __dirname + '/../public/fileWaiting/' + dados.data.nomeFicheiro
             fs.unlink(path, (err) =>{
                 if(err){
                     res.status(500).render('error', {error: err})
