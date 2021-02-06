@@ -1,7 +1,6 @@
 var mongoose = require('mongoose')
 
 var recursoSchema = new mongoose.Schema({
-   
     tipo: {type: [String], required:true},
     titulo: {type: String, required:true},
     subtitulo: String,
@@ -14,7 +13,6 @@ var recursoSchema = new mongoose.Schema({
     validado: Boolean,
     likes: [String],
     comentarios: [{nome: String, comentario: String}]
-
 })
 
 module.exports = mongoose.model('recurso',recursoSchema)

@@ -58,32 +58,32 @@ module.exports.adicionar = rec => {
 module.exports.apagar = (id, utilizador) => {
     if(utilizador.nivel == 1){
         return Recurso
-                .findOneAndDelete({_id: id, emailProdutor: utilizador.email})
-                .exec()
+            .findOneAndDelete({_id: id, emailProdutor: utilizador.email})
+            .exec()
     }
     else if(utilizador.nivel == 2){
         return Recurso
-                .findOneAndDelete({_id: id})
-                .exec()
+            .findOneAndDelete({_id: id})
+            .exec()
     }
 }
 
 module.exports.aprovar = id =>{
     return Recurso
-            .findOneAndUpdate({_id: id},{$set:{validado: "true"}})
-            .exec()
+        .findOneAndUpdate({_id: id},{$set:{validado: "true"}})
+        .exec()
 }
 
 module.exports.editar = (id, rec, utilizador) =>{
     if(utilizador.nivel == 1){
         return Recurso
-                .findOneAndUpdate({_id: id, emailProdutor: utilizador.email},{$set:{tipo: rec.tipo, visibilidade: rec.visibilidade}})
-                .exec()
+            .findOneAndUpdate({_id: id, emailProdutor: utilizador.email},{$set:{tipo: rec.tipo, visibilidade: rec.visibilidade}})
+            .exec()
     }
     else if(utilizador.nivel == 2){
         return Recurso
-                .findOneAndUpdate({_id: id},{$set:{tipo: rec.tipo, visibilidade: rec.visibilidade}})
-                .exec()
+            .findOneAndUpdate({_id: id},{$set:{tipo: rec.tipo, visibilidade: rec.visibilidade}})
+            .exec()
     }
 }
 
@@ -94,8 +94,8 @@ module.exports.adicionarLike = (id, email, callback) => {
                 var i = recurso.likes.indexOf(email)
                 recurso.likes.splice(i, 1)
                 return Recurso
-                        .findOneAndUpdate({_id: id},{$set:{likes: recurso.likes}})
-                        .exec()
+                    .findOneAndUpdate({_id: id},{$set:{likes: recurso.likes}})
+                    .exec()
                         .then(data => callback(null, data))
                         .catch(erro => {
                             callback(erro, null)
@@ -104,8 +104,8 @@ module.exports.adicionarLike = (id, email, callback) => {
             else{
                 recurso.likes.push(email)
                 return Recurso
-                        .findOneAndUpdate({_id: id},{$set:{likes: recurso.likes}})
-                        .exec()
+                    .findOneAndUpdate({_id: id},{$set:{likes: recurso.likes}})
+                    .exec()
                         .then(data => callback(null, data))
                         .catch(erro => {
                             callback(erro, null)
@@ -119,19 +119,19 @@ module.exports.adicionarLike = (id, email, callback) => {
 
 module.exports.adicionarComentario = (id, n, c) => {
     return Recurso
-            .findOneAndUpdate({_id: id},{$push:{comentarios: {nome: n, comentario: c}}})
-            .exec()
+        .findOneAndUpdate({_id: id},{$push:{comentarios: {nome: n, comentario: c}}})
+        .exec()
 }
 
 module.exports.apagarComentario = (id, n, c, utilizador) => {
     if(utilizador.nivel == 1){
         return Recurso
-                .findOneAndUpdate({_id: id, emailProdutor: utilizador.email}, {$pull:{comentarios: {nome: n, comentario: c}}})
-                .exec()
+            .findOneAndUpdate({_id: id, emailProdutor: utilizador.email}, {$pull:{comentarios: {nome: n, comentario: c}}})
+            .exec()
     }
     else if(utilizador.nivel == 2){
         return Recurso
-                .findOneAndUpdate({_id: id}, {$pull:{comentarios: {nome: n, comentario: c}}})
-                .exec()
+            .findOneAndUpdate({_id: id}, {$pull:{comentarios: {nome: n, comentario: c}}})
+            .exec()
     }
 }

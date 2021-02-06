@@ -50,18 +50,18 @@ module.exports.editar = (email,utilizador, callback) =>{
 
 module.exports.consultar = (e, callback) => {
     return Utilizador
-     .findOne({email: e})
-     .exec()
-        .then(data => callback(null, data))
-        .catch(erro => {
-            callback(erro, null)
-        })  
+        .findOne({email: e})
+        .exec()
+            .then(data => callback(null, data))
+            .catch(erro => {
+                callback(erro, null)
+            })  
 }
 
 //cada vez que faz login vai atualizar a data do último acesso para esta não ser sempre igual
 module.exports.atualizaData = (email) =>{
     var aux = new Date().toISOString().substring(0,10)
     return Utilizador
-            .findOneAndUpdate({email: email},{$set:{dataUltimoAcesso: aux}})
-            .exec()
+        .findOneAndUpdate({email: email},{$set:{dataUltimoAcesso: aux}})
+        .exec()
 }
