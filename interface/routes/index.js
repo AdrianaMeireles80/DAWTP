@@ -3,6 +3,7 @@ var router = express.Router();
 var axios = require('axios')
 var multer = require('multer')
 var fs = require('fs')
+var FormData = require('form-data');
 
 var upload = multer({dest:'uploads/'})
 
@@ -118,7 +119,30 @@ router.get('/logout', function(req, res){
 
 /* GET download de um ficheiro */
 router.get('/recurso/download/:fname', function(req,res){
-    res.download(__dirname + '/../public/fileStore/' + req.params.fname )
+    var filename = req.params.fname
+
+    axios({
+        method: "get",
+        url: "http://localhost:7800/recurso/download/" + filename + "?token=" + req.cookies.token,
+        responseType: "stream"
+    })
+        .then(function (response) {
+            var stream = response.data.pipe(fs.createWriteStream(__dirname + '/../downloads/' + filename))      
+            
+            stream.on('finish', function(){
+                res.download(__dirname + '/../downloads/' + filename, function(erro){
+                    if(!erro){
+                        fs.unlinkSync(__dirname + '/../downloads/' + filename, (err)=>{
+                            if(err) {
+                                console.log(err)
+                            }
+                            
+                            res.redirect('/recurso')
+                        })
+                    }
+                })
+            })                  
+        })
 })
 
 /* GET informação toda de um recurso */
@@ -169,35 +193,74 @@ router.post('/recurso/tipo',function(req,res,next){
         .catch(err => res.status(500).render('error', {error : err}))   
 })
 
-/* POST pagina de submissao de um recurso */
-router.post('/recurso', upload.array('myfile',12), function(req,res){
-    var novoRec = req.body
+/* funcao que cria um formulario de submissao com a informacao de um ficheiro */
+function form_data_file(file, utilizador, info){
+    return new Promise(function(resolve, reject){
+        let form_data = new FormData();
+
+        form_data.append("myfile", fs.createReadStream(file.path), file.originalname)
+        form_data.append("tipo", info.tipo)
+        form_data.append("titulo", info.titulo)
+        form_data.append("subtitulo", info.subtitulo)
+        form_data.append("visibilidade", info.visibilidade)
+        form_data.append("dataCriacao", info.dataCriacao)
+        form_data.append("nomeProdutor", utilizador.nome)
+        form_data.append("emailProdutor", utilizador.email)
+        resolve(form_data)
+    })
+}
+
+/* funcao que trata do envio de um ficheiro para o servidor dos recursos */
+function post_ficheiro(file, utilizador, info, token){
+    return new Promise(function(resolve, reject){
+        var uti = utilizador
+        var infos = info
+        var ficheiro = file
+        var tok = token
+
+        form_data_file(ficheiro, uti, infos)
+            .then(form_data => {
+                const request_config = {
+                    headers: {
+                        ...form_data.getHeaders()
+                    }
+                };
+
+                const url = 'http://localhost:7800/recurso?token=' + tok
+                
+                axios.post(url, form_data, request_config)  
+                    .then(dados => {
+                        resolve(dados)
+                    })
+                    .catch(erro => console.log(JSON.stringify(erro)))
+            })
+    })
+}
+
+/* POST submissao de um recurso */
+router.post('/recurso', upload.single('myfile'), function(req,res){
 
     axios.get('http://localhost:7700/utilizador/' + req.cookies.email)
         .then(dados => {
+
             var uti = dados.data
+            var info = req.body
+            var file = req.file
+            var token = req.cookies.token
 
-            novoRec.nomeProdutor = uti.nome
-            novoRec.emailProdutor = uti.email
-            req.files.forEach(reqfile => {
-        
-                novoRec.nomeFicheiro = reqfile.originalname
-                let oldPath = __dirname + '/../' + reqfile.path
-                let newPath = __dirname + '/../public/fileWaiting/' + reqfile.originalname
-
-                fs.rename(oldPath,newPath,function(err){
-                    if(err)
-                        throw err
-
-                    else {
-                        axios.post('http://localhost:7800/recurso?token=' + req.cookies.token, novoRec)
-                            .then(() =>{
-                                res.redirect('/recurso')
-                            })
-                            .catch(err => res.status(500).render('error', {error: err}))
-                    }
+            post_ficheiro(file, uti, info, token)
+                .then(dados => {
+                    var path = __dirname + '/../' + req.file.path
+                    
+                    fs.unlink(path, (err) =>{
+                        if(err){
+                            res.status(500).render('error', {error: err})
+                        }
+                        else
+                            res.redirect('/recurso')
+                    })
                 })
-            })
+                .catch(err => res.status(500).render('error', {error: err}))
         })
         .catch(e => res.render('error', {error : e}))
 })
@@ -235,51 +298,27 @@ router.post('/recurso/comentario/apagar/:id', function(req, res, next){
         .catch(err => res.status(500).render('error', {error: err}))
 })
 
-/* POST administrador aprovar recurso */
+/* POST administrador aprova recurso */
 router.post('/recurso/aprovar/:id', function(req, res, next){
-    let oldPath = __dirname + '/../public/fileWaiting/' + req.body.nomeFicheiro
-    let newPath = __dirname + '/../public/fileStore/' + req.body.nomeFicheiro
+    axios.put('http://localhost:7800/recurso/aprovar/' + req.params.id + '?token=' + req.cookies.token, req.body)
+        .then(() => res.redirect('/recurso'))
+        .catch(err => res.status(500).render('error', {error: err}))
+})
 
-    fs.rename(oldPath,newPath,function(err){
-        if(err)
-            throw err
-
-        else {
-            axios.put('http://localhost:7800/recurso/aprovar/' + req.params.id + '?token=' + req.cookies.token)
-                .then(() => res.redirect('/recurso'))
-                .catch(err => res.status(500).render('error', {error: err}))
-        }
-    })
+/*POST administrador nao aprova recurso (utiliza-se POST por causa do form do outro lado)*/
+router.post('/recurso/naoaprovar/:id',function(req,res,next){
+    axios.delete('http://localhost:7800/recurso/naoaprovar/' + req.params.id + '?token=' + req.cookies.token)
+        .then(dados =>{
+            res.redirect('/recurso')       
+        })
+        .catch(err => res.status(500).render('error', {error: err}))
 })
 
 /*POST apagar recurso (utiliza-se POST por causa do form do outro lado)*/
 router.post('/recurso/:id',function(req,res,next){
     axios.delete('http://localhost:7800/recurso/' + req.params.id + '?token=' + req.cookies.token)
         .then(dados =>{
-            var path = __dirname + '/../public/fileStore/' + dados.data.nomeFicheiro
-            fs.unlink(path, (err) =>{
-                if(err){
-                    res.status(500).render('error', {error: err})
-                }
-                else
-                    res.redirect('/recurso')
-            })            
-        })
-        .catch(err => res.status(500).render('error', {error: err}))
-})
-
-/*POST apagar nao aprovado recurso (utiliza-se POST por causa do form do outro lado)*/
-router.post('/recurso/naoaprovar/:id',function(req,res,next){
-    axios.delete('http://localhost:7800/recurso/' + req.params.id + '?token=' + req.cookies.token)
-        .then(dados =>{
-            var path = __dirname + '/../public/fileWaiting/' + dados.data.nomeFicheiro
-            fs.unlink(path, (err) =>{
-                if(err){
-                    res.status(500).render('error', {error: err})
-                }
-                else
-                    res.redirect('/recurso')
-            })            
+            res.redirect('/recurso')        
         })
         .catch(err => res.status(500).render('error', {error: err}))
 })

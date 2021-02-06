@@ -1,7 +1,11 @@
 var express = require('express');
+var multer = require('multer')
+var fs = require('fs')
 var router = express.Router();
 var Recs = require('../controllers/recurso');
 var Tipo = require('../controllers/tipo');
+
+var upload = multer({dest:'uploads/'})
 
 /* funcao que verifica se um utilizador tem permissao para executar uma operacao */
 function checkPermissao(acess){
@@ -37,6 +41,11 @@ router.get('/tipos', checkPermissao(1), function(req,res,next){
         })
 })
 
+/* GET download de um ficheiro */
+router.get('/download/:fname', checkPermissao(0), function(req, res){
+    res.download(__dirname + '/../public/fileStore/' + req.params.fname)
+})
+
 /* GET devolve um recurso */
 router.get('/:id', checkPermissao(0), function(req,res,next){
     Recs.procurar(req.params.id, req.app.get('utilizador'))
@@ -49,14 +58,28 @@ router.get('/:id', checkPermissao(0), function(req,res,next){
 })
 
 /* POST adicionar um recurso */
-router.post('/', checkPermissao(1), function(req,res,next){
-    Recs.adicionar(req.body)
-        .then(dados => {
-            res.jsonp(dados)
-        })
-        .catch(erro => {
-            res.status(500).jsonp(erro)
-        })
+router.post('/', upload.single('myfile'), checkPermissao(1), function(req,res,next){
+
+    var novoRec = req.body
+    novoRec.nomeFicheiro = req.file.originalname
+
+    let oldPath = __dirname + '/../' + req.file.path
+    let newPath = __dirname + '/../public/fileWaiting/' + req.file.originalname
+
+    fs.rename(oldPath,newPath,function(err){
+        if(err)
+            throw err
+
+        else {
+            Recs.adicionar(novoRec)
+                .then(dados => {
+                    res.jsonp(dados)
+                })
+                .catch(erro => {
+                    res.status(500).jsonp(erro)
+                })
+        } 
+    })
 })
 
 /* POST adicionar um tipo */
@@ -95,13 +118,23 @@ router.post('/comentario/:id', checkPermissao(0), function(req,res,next){
 
 /* PUT aprovacao de um recurso por um administrador */
 router.put('/aprovar/:id', checkPermissao(2), function(req,res,next){
-    Recs.aprovar(req.params.id)
-        .then(dados => {
-            res.jsonp(dados)
-        })
-        .catch(erro => {
-            res.status(500).jsonp(erro)
-        })
+    let oldPath = __dirname + '/../public/fileWaiting/' + req.body.nomeFicheiro
+    let newPath = __dirname + '/../public/fileStore/' + req.body.nomeFicheiro
+
+    fs.rename(oldPath,newPath,function(err){
+        if(err)
+            throw err
+
+        else {
+            Recs.aprovar(req.params.id)
+                .then(dados => {
+                    res.jsonp(dados)
+                })
+                .catch(erro => {
+                    res.status(500).jsonp(erro)
+                })
+        }
+    })
 })
 
 /* PUT atualizacao de um recurso */
@@ -126,11 +159,36 @@ router.delete('/comentario/apagar/:id', checkPermissao(1), function(req, res, ne
         })
 })
 
+/* DELETE apagar um recurso nao aprovado*/
+router.delete('/naoaprovar/:id', checkPermissao(2), function(req,res,next){
+    Recs.apagar(req.params.id, req.app.get('utilizador'))
+        .then(dados => {
+            var path = __dirname + '/../public/fileWaiting/' + dados.nomeFicheiro
+            fs.unlink(path, (err) =>{
+                if(err){
+                    res.status(500).render('error', {error: err})
+                }
+                else
+                    res.jsonp(dados)
+            })
+        })
+        .catch(erro => {
+            res.status(500).jsonp(erro)
+        })
+})
+
 /* DELETE apagar um recurso */
 router.delete('/:id', checkPermissao(1), function(req,res,next){
     Recs.apagar(req.params.id, req.app.get('utilizador'))
         .then(dados => {
-            res.jsonp(dados)
+            var path = __dirname + '/../public/fileStore/' + dados.nomeFicheiro
+            fs.unlink(path, (err) =>{
+                if(err){
+                    res.status(500).render('error', {error: err})
+                }
+                else
+                    res.jsonp(dados)
+            })
         })
         .catch(erro => {
             res.status(500).jsonp(erro)
