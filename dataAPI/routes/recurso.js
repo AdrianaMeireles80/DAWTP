@@ -62,6 +62,7 @@ router.post('/', upload.single('myfile'), checkPermissao(1), function(req,res,ne
 
     var novoRec = req.body
     novoRec.nomeFicheiro = req.file.originalname
+    novoRec.tipo = JSON.parse(novoRec.tipo)
 
     let oldPath = __dirname + '/../' + req.file.path
     let newPath = __dirname + '/../public/fileWaiting/' + req.file.originalname

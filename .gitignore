@@ -1,5 +1,6 @@
 node_modules
 fileStore
 fileWaiting
+fileToSend
 uploads
 downloads

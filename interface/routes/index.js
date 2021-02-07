@@ -1,9 +1,11 @@
-var express = require('express');
-var router = express.Router();
+var express = require('express')
+var router = express.Router()
 var axios = require('axios')
 var multer = require('multer')
 var fs = require('fs')
-var FormData = require('form-data');
+var FormData = require('form-data')
+var crypto = require('crypto')
+var zipper = require('zip-local')
 
 var upload = multer({dest:'uploads/'})
 
@@ -127,14 +129,14 @@ router.get('/recurso/download/:fname', function(req,res){
         responseType: "stream"
     })
         .then(function (response) {
-            var stream = response.data.pipe(fs.createWriteStream(__dirname + '/../downloads/' + filename))      
+            var stream = response.data.pipe(fs.createWriteStream(__dirname + '/../public/downloads/' + filename))      
             
             stream.on('finish', function(){
-                res.download(__dirname + '/../downloads/' + filename, function(erro){
+                res.download(__dirname + '/../public/downloads/' + filename, function(erro){
                     if(!erro){
-                        fs.unlinkSync(__dirname + '/../downloads/' + filename, (err)=>{
+                        fs.unlinkSync(__dirname + '/../public/downloads/' + filename, (err)=>{
                             if(err) {
-                                console.log(err)
+                                res.status(500).render('error', {error : err})
                             }
                             
                             res.redirect('/recurso')
@@ -199,7 +201,7 @@ function form_data_file(file, utilizador, info){
         let form_data = new FormData();
 
         form_data.append("myfile", fs.createReadStream(file.path), file.originalname)
-        form_data.append("tipo", info.tipo)
+        form_data.append("tipo", JSON.stringify(info.tipo))
         form_data.append("titulo", info.titulo)
         form_data.append("subtitulo", info.subtitulo)
         form_data.append("visibilidade", info.visibilidade)
@@ -224,11 +226,9 @@ function post_ficheiro(file, utilizador, info, token){
                     headers: {
                         ...form_data.getHeaders()
                     }
-                };
-
-                const url = 'http://localhost:7800/recurso?token=' + tok
+                }
                 
-                axios.post(url, form_data, request_config)  
+                axios.post('http://localhost:7800/recurso?token=' + tok, form_data, request_config)  
                     .then(dados => {
                         resolve(dados)
                     })
@@ -237,30 +237,113 @@ function post_ficheiro(file, utilizador, info, token){
     })
 }
 
+/* funcao que gera o checksum de um ficheiro */
+function generateChecksum(str, algorithm, encoding) {
+    return crypto.createHash(algorithm || 'sha256').update(str, 'utf8').digest(encoding || 'hex');
+}
+
 /* POST submissao de um recurso */
 router.post('/recurso', upload.single('myfile'), function(req,res){
 
     axios.get('http://localhost:7700/utilizador/' + req.cookies.email)
         .then(dados => {
+            var path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "")
 
-            var uti = dados.data
-            var info = req.body
-            var file = req.file
-            var token = req.cookies.token
+            //criacao da bag que ira conter a informacao
+            fs.mkdir(path, (err) => { 
+                if (err) { 
+                    res.status(500).render('error', {error: err}) 
+                }
 
-            post_ficheiro(file, uti, info, token)
-                .then(dados => {
-                    var path = __dirname + '/../' + req.file.path
-                    
-                    fs.unlink(path, (err) =>{
-                        if(err){
-                            res.status(500).render('error', {error: err})
+                path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/data'
+                
+                //criacao da pasta data dentro da bag
+                fs.mkdir(path, (err) => { 
+                    if (err) { 
+                        res.status(500).render('error', {error: err}) 
+                    }
+
+                    path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/bagit.txt'
+
+                    var conteudo = "BagIt-version: 1.0\nTag-File-Character-Encoding: UTF-8"
+
+                    // criacao do ficheiro bagit.txt
+                    fs.writeFile(path, conteudo, function (err) {
+                        if (err) { 
+                            res.status(500).render('error', {error: err}) 
                         }
-                        else
-                            res.redirect('/recurso')
+
+                        path = __dirname + '/../' + req.file.path
+
+                        //geracao do checksum do recurso a enviar na bag
+                        fs.readFile(path, function(err, data) {
+                            var checksum = generateChecksum(data);
+
+                            path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/manifest-sha256.txt'
+
+                            conteudo = checksum + " data/" + req.file.originalname
+                        
+                            //criacao do ficheiro de manifesto
+                            fs.writeFile(path, conteudo, function (err) {
+                                if (err) { 
+                                    res.status(500).render('error', {error: err}) 
+                                }
+
+                                var oldPath = __dirname + '/../' + req.file.path
+                                var newPath = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/data/' + req.file.originalname
+
+                                // mover o recurso a enviar da pasta de uploads para a pasta data
+                                fs.rename(oldPath, newPath, function(err){
+                                    if(err)
+                                        throw err
+
+                                    else {
+                                        oldPath = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "")
+                                        newPath = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + ".zip"
+
+                                        //criacao do zip da bag
+                                        zipper.sync.zip(oldPath).compress().save(newPath)
+
+                                        var uti = dados.data
+                                        var info = req.body
+                                        var file = {
+                                            originalname: req.file.originalname.replace(/\..*/g, "") + '.zip',
+                                            path: 'public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '.zip'
+                                        }
+                                        var token = req.cookies.token
+
+                                        //envio do recurso para o dataAPI
+                                        post_ficheiro(file, uti, info, token)
+                                            .then(() => {
+                                                path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "")
+                                                
+                                                // eliminar a bag criada
+                                                fs.rmdir(path, { recursive: true }, (err) =>{
+                                                    if(err){
+                                                        res.status(500).render('error', {error: err})
+                                                    }
+                                                    else{
+                                                        path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + ".zip"
+
+                                                        //eliminar o zip da bag
+                                                        fs.unlink(path, (err) =>{
+                                                            if(err){
+                                                                res.status(500).render('error', {error: err})
+                                                            }
+                                                            else
+                                                                res.redirect('/recurso')
+                                                            })
+                                                    }
+                                                })
+                                            })
+                                            .catch(err => res.status(500).render('error', {error: err}))
+                                    } 
+                                })
+                            })
+                        })
                     })
                 })
-                .catch(err => res.status(500).render('error', {error: err}))
+            })
         })
         .catch(e => res.render('error', {error : e}))
 })
