@@ -6,6 +6,8 @@ var fs = require('fs')
 var FormData = require('form-data')
 var crypto = require('crypto')
 var zipper = require('zip-local')
+const followRedirects = require('follow-redirects');
+followRedirects.maxBodyLength = 25 * 1024 * 1024;
 
 var upload = multer({dest:'uploads/'})
 
@@ -248,7 +250,7 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
 
     axios.get('http://localhost:7700/utilizador/' + req.cookies.email)
         .then(dados => {
-            var path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "")
+            var path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\./g, "_")
 
             //criacao da bag que ira conter a informacao
             fs.mkdir(path, (error) => { 
@@ -256,7 +258,7 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
                     res.status(500).render('error', {error: error}) 
                 }
 
-                path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/data'
+                path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\./g, "_") + '/data'
                 
                 //criacao da pasta data dentro da bag
                 fs.mkdir(path, (erro) => { 
@@ -264,7 +266,7 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
                         res.status(500).render('error', {error: erro}) 
                     }
 
-                    path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/bagit.txt'
+                    path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\./g, "_") + '/bagit.txt'
 
                     var conteudo = "BagIt-version: 1.0\nTag-File-Character-Encoding: UTF-8"
 
@@ -280,7 +282,7 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
                         fs.readFile(path, function(er, data) {
                             var checksum = generateChecksum(data);
 
-                            path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/manifest-sha256.txt'
+                            path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\./g, "_") + '/manifest-sha256.txt'
 
                             conteudo = checksum + " data/" + req.file.originalname
                         
@@ -291,7 +293,7 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
                                 }
 
                                 var oldPath = __dirname + '/../' + req.file.path
-                                var newPath = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/data/' + req.file.originalname
+                                var newPath = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\./g, "_") + '/data/' + req.file.originalname
 
                                 // mover o recurso a enviar da pasta de uploads para a pasta data
                                 fs.rename(oldPath, newPath, function(e1){
@@ -299,8 +301,8 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
                                         throw e1
 
                                     else {
-                                        oldPath = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "")
-                                        newPath = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + ".zip"
+                                        oldPath = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\./g, "_")
+                                        newPath = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\./g, "_") + ".zip"
 
                                         //criacao do zip da bag
                                         zipper.sync.zip(oldPath).compress().save(newPath)
@@ -308,15 +310,15 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
                                         var uti = dados.data
                                         var info = req.body
                                         var file = {
-                                            originalname: req.file.originalname.replace(/\..*/g, "") + '.zip',
-                                            path: 'public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '.zip'
+                                            originalname: req.file.originalname.replace(/\./g, "_") + '.zip',
+                                            path: 'public/fileToSend/' + req.file.originalname.replace(/\./g, "_") + '.zip'
                                         }
                                         var token = req.cookies.token
 
                                         //envio do recurso para o dataAPI
                                         post_ficheiro(file, uti, info, token)
                                             .then(() => {
-                                                path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "")
+                                                path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\./g, "_")
                                                 
                                                 // eliminar a bag criada
                                                 fs.rmdir(path, { recursive: true }, (e2) =>{
@@ -324,7 +326,7 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
                                                         res.status(500).render('error', {error: e2})
                                                     }
                                                     else{
-                                                        path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + ".zip"
+                                                        path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\./g, "_") + ".zip"
 
                                                         //eliminar o zip da bag
                                                         fs.unlink(path, (e3) =>{
