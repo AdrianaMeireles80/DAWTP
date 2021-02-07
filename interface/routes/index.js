@@ -251,17 +251,17 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
             var path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "")
 
             //criacao da bag que ira conter a informacao
-            fs.mkdir(path, (err) => { 
-                if (err) { 
-                    res.status(500).render('error', {error: err}) 
+            fs.mkdir(path, (error) => { 
+                if (error) { 
+                    res.status(500).render('error', {error: error}) 
                 }
 
                 path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/data'
                 
                 //criacao da pasta data dentro da bag
-                fs.mkdir(path, (err) => { 
-                    if (err) { 
-                        res.status(500).render('error', {error: err}) 
+                fs.mkdir(path, (erro) => { 
+                    if (erro) { 
+                        res.status(500).render('error', {error: erro}) 
                     }
 
                     path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/bagit.txt'
@@ -277,7 +277,7 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
                         path = __dirname + '/../' + req.file.path
 
                         //geracao do checksum do recurso a enviar na bag
-                        fs.readFile(path, function(err, data) {
+                        fs.readFile(path, function(er, data) {
                             var checksum = generateChecksum(data);
 
                             path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/manifest-sha256.txt'
@@ -285,18 +285,18 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
                             conteudo = checksum + " data/" + req.file.originalname
                         
                             //criacao do ficheiro de manifesto
-                            fs.writeFile(path, conteudo, function (err) {
-                                if (err) { 
-                                    res.status(500).render('error', {error: err}) 
+                            fs.writeFile(path, conteudo, function (e) {
+                                if (e) { 
+                                    res.status(500).render('error', {error: e}) 
                                 }
 
                                 var oldPath = __dirname + '/../' + req.file.path
                                 var newPath = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + '/data/' + req.file.originalname
 
                                 // mover o recurso a enviar da pasta de uploads para a pasta data
-                                fs.rename(oldPath, newPath, function(err){
-                                    if(err)
-                                        throw err
+                                fs.rename(oldPath, newPath, function(e1){
+                                    if(e1)
+                                        throw e1
 
                                     else {
                                         oldPath = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "")
@@ -319,17 +319,17 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
                                                 path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "")
                                                 
                                                 // eliminar a bag criada
-                                                fs.rmdir(path, { recursive: true }, (err) =>{
-                                                    if(err){
-                                                        res.status(500).render('error', {error: err})
+                                                fs.rmdir(path, { recursive: true }, (e2) =>{
+                                                    if(e2){
+                                                        res.status(500).render('error', {error: e2})
                                                     }
                                                     else{
                                                         path = __dirname + '/../public/fileToSend/' + req.file.originalname.replace(/\..*/g, "") + ".zip"
 
                                                         //eliminar o zip da bag
-                                                        fs.unlink(path, (err) =>{
-                                                            if(err){
-                                                                res.status(500).render('error', {error: err})
+                                                        fs.unlink(path, (e3) =>{
+                                                            if(e3){
+                                                                res.status(500).render('error', {error: e3})
                                                             }
                                                             else
                                                                 res.redirect('/recurso')
@@ -337,7 +337,7 @@ router.post('/recurso', upload.single('myfile'), function(req,res){
                                                     }
                                                 })
                                             })
-                                            .catch(err => res.status(500).render('error', {error: err}))
+                                            .catch(e2 => res.status(500).render('error', {error: e2}))
                                     } 
                                 })
                             })

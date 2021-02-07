@@ -1,6 +1,7 @@
 var express = require('express');
 var multer = require('multer')
 var fs = require('fs')
+var crypto = require('crypto')
 var zipper = require('zip-local')
 var router = express.Router();
 var Recs = require('../controllers/recurso');
@@ -52,9 +53,9 @@ router.get('/download/:fname', checkPermissao(0), function(req, res){
     
     res.download(newPath, (err) => {
         if(!err){
-            fs.unlink(newPath, (err) =>{
-                if(err){
-                    res.status(500).render('error', {error: err})
+            fs.unlink(newPath, (e) =>{
+                if(e){
+                    res.status(500).jsonp(e)
                 }
             })
         }
@@ -132,36 +133,77 @@ router.post('/comentario/:id', checkPermissao(0), function(req,res,next){
         })
 })
 
+/* funcao que gera o checksum de um ficheiro */
+function generateChecksum(str, algorithm, encoding) {
+    return crypto.createHash(algorithm || 'sha256').update(str, 'utf8').digest(encoding || 'hex');
+}
+
 /* PUT aprovacao de um recurso por um administrador */
 router.put('/aprovar/:id', checkPermissao(2), function(req,res,next){
     let oldPath = __dirname + '/../public/fileWaiting/' + req.body.nomeFicheiro
     let newPath = __dirname + '/../public/fileStore/' + req.body.nomeFicheiro.replace(/\.zip/g, "")
 
-    fs.mkdir(newPath, (err) => { 
-        if (err) { 
-            res.status(500).render('error', {error: err}) 
+    //criar a pasta onde vai ser guardado o recurso, no fileStore
+    fs.mkdir(newPath, (error) => { 
+        if (error) { 
+            res.status(500).jsonp(error) 
         }
         else{
-
-            console.log(oldPath + "\n" + newPath)
         
+            //dar unzip do recurso para a pasta criada
             zipper.sync.unzip(oldPath).save(newPath)
-        
-            console.log("fiz unzip")
-        
-            Recs.aprovar(req.params.id)
-                .then(dados => {
-                    fs.unlink(oldPath, (err) =>{
-                        if(err){
-                            res.status(500).render('error', {error: err})
+
+            //verificar se o recurso tem a estrutura necessária
+            if(fs.existsSync(newPath + "/data") && fs.existsSync(newPath + "/bagit.txt") && fs.existsSync(newPath + "/manifest-sha256.txt")){
+                
+                //ler o ficheiro do manifesto e guardar as informacoes numa string
+                fs.readFile(newPath + "/manifest-sha256.txt", "utf8", function(erro, dados) {
+                    var checksum = dados.split('\n')[0].split(' ')[0]
+                    var file = dados.split('\n')[0].split(' ')[1]
+
+                    //determinar o checksum do recurso
+                    fs.readFile(newPath + "/" + file, function(err, data) {
+                        var checksum2 = generateChecksum(data);
+
+                        //verificar se o checksum calculado e igual ao checksum guardado no manifesto
+                        if(checksum == checksum2){
+                            Recs.aprovar(req.params.id)
+                                .then(dados => {
+                                    fs.unlink(oldPath, (e) =>{
+                                        if(e){
+                                            res.status(500).jsonp(e)
+                                        }
+                                        else
+                                            res.jsonp(dados)
+                                    })
+                                })
+                                .catch(e => {
+                                    res.status(500).jsonp(e)
+                                })
                         }
-                        else
-                            res.jsonp(dados)
+                        else{
+                            //remover a pasta do recurso criada caso o teste do checksum nao seja valido
+                            fs.rmdir(path, { recursive: true }, (e) =>{
+                                if(e){
+                                    res.status(500).jsonp(e)
+                                }
+                                else
+                                    res.status(500).jsonp({error: "Ficheiro inválido"})
+                            })
+                        }
                     })
                 })
-                .catch(erro => {
-                    res.status(500).jsonp(erro)
+            }
+            else{
+                //remover a pasta do recurso criada caso a estrutura seja invalida
+                fs.rmdir(path, { recursive: true }, (err) =>{
+                    if(err){
+                        res.status(500).jsonp(err)
+                    }
+                    else
+                        res.status(500).jsonp({error: "Estrutura do pacote inválida"})
                 })
+            }
         }
     })
 })
@@ -195,7 +237,7 @@ router.delete('/naoaprovar/:id', checkPermissao(2), function(req,res,next){
             var path = __dirname + '/../public/fileWaiting/' + dados.nomeFicheiro
             fs.unlink(path, (err) =>{
                 if(err){
-                    res.status(500).render('error', {error: err})
+                    res.status(500).jsonp(err)
                 }
                 else
                     res.jsonp(dados)
@@ -213,7 +255,7 @@ router.delete('/:id', checkPermissao(1), function(req,res,next){
             var path = __dirname + '/../public/fileStore/' + dados.nomeFicheiro.replace(/\.zip/g, "")
             fs.rmdir(path, { recursive: true }, (err) =>{
                 if(err){
-                    res.status(500).render('error', {error: err})
+                    res.status(500).jsonp(err)
                 }
                 else
                     res.jsonp(dados)
