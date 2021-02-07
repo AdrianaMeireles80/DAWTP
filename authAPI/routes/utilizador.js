@@ -32,7 +32,7 @@ router.get('/:email', function(req,res,next){
 router.post('/login', passport.authenticate('local'), function(req,res){
     Utls.procurar(req.body.email)
         .then(dados => {
-            jwt.sign({ email: dados.email, nome: dados.nome, nivel: dados.nivel }, //nivel para ser usado no backend 
+            jwt.sign({ email: dados.email, nome: dados.nome, nivel: dados.nivel }, //nivel para ser usado pelo dataAPI 
                 "DAWTP2020",
                 {expiresIn: 1800},
                 function(e, token){

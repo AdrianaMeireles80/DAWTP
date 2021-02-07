@@ -1,6 +1,7 @@
 var express = require('express');
 var multer = require('multer')
 var fs = require('fs')
+var zipper = require('zip-local')
 var router = express.Router();
 var Recs = require('../controllers/recurso');
 var Tipo = require('../controllers/tipo');
@@ -43,7 +44,21 @@ router.get('/tipos', checkPermissao(1), function(req,res,next){
 
 /* GET download de um ficheiro */
 router.get('/download/:fname', checkPermissao(0), function(req, res){
-    res.download(__dirname + '/../public/fileStore/' + req.params.fname)
+    var oldPath = __dirname + '/../public/fileStore/' + req.params.fname.replace(/\.zip/g, "")
+    var newPath = __dirname + '/../public/fileStore/' + req.params.fname
+
+    //criacao do zip do recurso
+    zipper.sync.zip(oldPath).compress().save(newPath)
+    
+    res.download(newPath, (err) => {
+        if(!err){
+            fs.unlink(newPath, (err) =>{
+                if(err){
+                    res.status(500).render('error', {error: err})
+                }
+            })
+        }
+    })
 })
 
 /* GET devolve um recurso */
@@ -120,16 +135,29 @@ router.post('/comentario/:id', checkPermissao(0), function(req,res,next){
 /* PUT aprovacao de um recurso por um administrador */
 router.put('/aprovar/:id', checkPermissao(2), function(req,res,next){
     let oldPath = __dirname + '/../public/fileWaiting/' + req.body.nomeFicheiro
-    let newPath = __dirname + '/../public/fileStore/' + req.body.nomeFicheiro
+    let newPath = __dirname + '/../public/fileStore/' + req.body.nomeFicheiro.replace(/\.zip/g, "")
 
-    fs.rename(oldPath,newPath,function(err){
-        if(err)
-            throw err
+    fs.mkdir(newPath, (err) => { 
+        if (err) { 
+            res.status(500).render('error', {error: err}) 
+        }
+        else{
 
-        else {
+            console.log(oldPath + "\n" + newPath)
+        
+            zipper.sync.unzip(oldPath).save(newPath)
+        
+            console.log("fiz unzip")
+        
             Recs.aprovar(req.params.id)
                 .then(dados => {
-                    res.jsonp(dados)
+                    fs.unlink(oldPath, (err) =>{
+                        if(err){
+                            res.status(500).render('error', {error: err})
+                        }
+                        else
+                            res.jsonp(dados)
+                    })
                 })
                 .catch(erro => {
                     res.status(500).jsonp(erro)
@@ -182,8 +210,8 @@ router.delete('/naoaprovar/:id', checkPermissao(2), function(req,res,next){
 router.delete('/:id', checkPermissao(1), function(req,res,next){
     Recs.apagar(req.params.id, req.app.get('utilizador'))
         .then(dados => {
-            var path = __dirname + '/../public/fileStore/' + dados.nomeFicheiro
-            fs.unlink(path, (err) =>{
+            var path = __dirname + '/../public/fileStore/' + dados.nomeFicheiro.replace(/\.zip/g, "")
+            fs.rmdir(path, { recursive: true }, (err) =>{
                 if(err){
                     res.status(500).render('error', {error: err})
                 }

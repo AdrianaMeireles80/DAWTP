@@ -145,6 +145,7 @@ router.get('/recurso/download/:fname', function(req,res){
                 })
             })                  
         })
+        .catch(err => res.status(500).render('error', {error : err}))
 })
 
 /* GET informação toda de um recurso */
